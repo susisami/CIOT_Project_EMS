@@ -1,10 +1,14 @@
 /* LIBRARIES */
-#include <stdio.h>
-#include <stdbool.h>
-#include <sys/unistd.h>
-#include "hardware/pwm.h"
-#include "pico/stdlib.h"
-#include "pico/util/queue.h"
+    // STD C  FILES
+    #include <stdio.h>
+    #include <stdbool.h>
+    #include <sys/unistd.h>
+
+    // HEADER FILES
+    #include "hardware/pwm.h"
+    #include "pico/stdlib.h"
+    #include "pico/util/queue.h"
+    #include "calib.h"
 
 /* CONSTANTS */
     // ISR CONSTANTS
@@ -29,10 +33,14 @@ void irq_rot_sw(uint gpio, uint32_t events);
 /* SYSTEM QUEUES */
 static queue_t event_queue;
 
+
+/* FUNCTIONS */
+
 int main() {
     /* SYSTEM VARIABLES */
     bool isCalibrated = false;
 
+    stdio_init_all();
     while (true)
     {
         while (queue_try_remove() && !isCalibrated)
@@ -45,11 +53,10 @@ int main() {
         {
 
         }
-
     }
 }
 
-/* ISRS */
+//ISRS
 
     // ROTARY ENCODER SW
     void irq_rot_sw(uint gpio, uint32_t events)
