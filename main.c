@@ -63,7 +63,7 @@ int main() {
     gpio_init_all();
     stdio_init_all();
     queue_init(&event_queue, sizeof(bool), QUEUE_SIZE);
-    gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_FALL, true, &irq_rot_sw);
+    gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_RISE, true, &irq_rot_sw);
 
 
     printf("Boot\n");
@@ -78,23 +78,27 @@ int main() {
                 // TOGGLE LED
                 led_state = !led_state; 
                 gpio_put(LED_2, led_state);
-                sleep_ms(LED_BLINK_MS);
+                sleep_ms(LED_BLINK_MS); // delays the calibration after button press, find a solution
                 
-                if (pressed) {
+                if (pressed) { 
                     program_state = CALIB;
                     pressed = false;
                     gpio_put(LED_2, false);
                 }
-
                 break;
 
 
             case CALIB:
 
-                    calib();
-                    program_state = PRE_DISPENSE;
-                    gpio_put(LED_2, 1);
+                /* calibrates the motor && returns the total 
+                steps of a full rotation (approx. 4096 steps) */
+                int stepsPerRev = motor_calibration();
 
+                // TODO: fix the callback-bug
+                gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_RISE, true, &irq_rot_sw); // temporary fix, will be removed
+
+                program_state = PRE_DISPENSE;
+                gpio_put(LED_2, true);
                 break;
 
 
@@ -109,6 +113,7 @@ int main() {
 
 
             case DISPENSE:
+
 /*                while (absolute_time_diff_us() && dispense_position < DISPENSE_COMPLETE) {
 
 
@@ -128,6 +133,7 @@ int main() {
     void irq_rot_sw(uint gpio, uint32_t events)
     {
         const absolute_time_t start_time = get_absolute_time();
+
         if (absolute_time_diff_us(last_press_time, start_time) > DEBOUNCE_MS * 1000)
         {
             last_press_time = start_time;

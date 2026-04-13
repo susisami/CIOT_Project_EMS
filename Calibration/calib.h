@@ -1,6 +1,6 @@
 #ifndef CALIBRATION_H
 #define CALIBRATION_H
 
-int calib(void);
+int motor_calibration(void);
 
 #endif //CALIBRATION_H

@@ -22,7 +22,7 @@ void gpio_callback(uint gpio, uint32_t events);
 */
 
 
-int calib(void)
+int motor_calibration(void)
 {
     int steps_per_rev = 0;
     int opto_fork_value = 0;
@@ -40,7 +40,7 @@ int calib(void)
 
     calibrate_motor(&steps_per_rev, &opto_fork_value, steps_arr);
 
-    return 0;
+    return steps_per_rev;
 }
 
 
