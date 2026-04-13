@@ -2,7 +2,7 @@
     // STD C  FILES
     #include <stdio.h>
 
-int calib()
+int function()
 {
     printf("MORO");
 

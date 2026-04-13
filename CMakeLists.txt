@@ -24,8 +24,10 @@ add_compile_options(-Wall
 # Tell CMake where to find the executable source file
 add_executable(${PROJECT_NAME} 
     main.c
-        functions.h
-        functions.c
+        Calibration/calib.c
+        Calibration/calib.h
+        Functions/functions.c
+        Functions/functions.h
         Initializes/initialize.c
         Initializes/initialize.h
         Utilities/utils.c
