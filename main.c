@@ -13,6 +13,7 @@
     #include "Initializes/initialize.h"
     #include "Calibration/calib.h"
 
+
 /* CONSTANTS */
     // SYSTEM VARIABLES
     #define DISPENSE_COMPLETE 7
@@ -24,19 +25,25 @@
 
 
 /* FUNCTION DECLARATIONS */
-
-    // MAIN FUNCTIONS
-
     // ISR
+    void irq_rot_sw(uint gpio, uint32_t events);
 
-    // UTILITIES
 
 /* GLOBAL VARIABLES */
-
     // ISR TIMEOUTS
     static absolute_time_t last_press_time;
 
-void irq_rot_sw(uint gpio, uint32_t events);
+
+/* STRUCTURES */
+    // SYSTEM STRUCTURE
+    typedef struct SystemInformation
+    {
+        bool isCalibrated;
+        uint avg_steps;
+        // PRESSED HERE?
+        // LED STATE HERE?
+
+    } sys_info_t;
 
 
 /* SYSTEM QUEUES */
@@ -44,10 +51,8 @@ static queue_t event_queue;
 
 
 /* FUNCTIONS */
-
 int main() {
-    
-    
+
     /* SYSTEM VARIABLES */
     program_state_t program_state = PRE_CALIB;
     //        uint dispense_position = 0;
