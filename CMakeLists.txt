@@ -24,8 +24,12 @@ add_compile_options(-Wall
 # Tell CMake where to find the executable source file
 add_executable(${PROJECT_NAME} 
     main.c
-        calib.h
-        calib.c
+        functions.h
+        functions.c
+        Initializes/initialize.c
+        Initializes/initialize.h
+        Utilities/utils.c
+        Utilities/utils.h
 )
 
 # Create map/bin/hex/uf2 files
