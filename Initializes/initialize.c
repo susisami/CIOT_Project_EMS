@@ -2,54 +2,44 @@
 #include "../Macros/macros.h" 
 #include "pico/util/queue.h"
 
-
 typedef struct SystemInformation
 {
-    bool isCalibrated; 
+    bool isCalibrated;
 
     uint avg_steps;
     // total steps per full cycle (approx. 4096)
-    uint steps_per_rev; 
+
+    uint steps_per_rev;
     // position from 0 to steps_per_rev (calibrated=0, increasing clockwise)
-    uint dispenser_position; 
-    // button pressed
+
+    absolute_time_t dispense_start_time;
+    // Timestamp for controlling the dispense happening at intervals.
+
+    uint dispenser_position;
+    // Marks the current total amount of steps in the mode DISPENSE
+
+    uint dispensed_pills;
+    // Amount of pills that has been dispensed
+
     bool button_pressed;
     //
+
     bool led_on;
 
 } sys_info_t;
 
-
 void init_sys_variables(sys_info_t *systemVariables)
 {
-    systemVariables->button_pressed = false;
-    systemVariables->led_on = false;
     systemVariables->isCalibrated = false;
-    systemVariables->dispenser_position = 0;
     systemVariables->avg_steps = 0;
     systemVariables->steps_per_rev = 0;
+    systemVariables->dispense_start_time = 0;
+    systemVariables->dispenser_position = 0;
+    systemVariables->dispensed_pills = 0;
+    systemVariables->button_pressed = false;
+    systemVariables->led_on = false;
 }
 
-// Interrupt callback function for  ROT_SW  &&  OPTO_FORK
-    queue_t event_queue;
-    absolute_time_t last_press_time;
-
-    void interrupt_callback(uint gpio, uint32_t events)
-    {
-        const absolute_time_t start_time = get_absolute_time();
-
-        if (gpio == OPTO_FORK) // opto fork doesn't need debounce
-        {
-            queue_try_add(&event_queue, &gpio);
-        }
-        else if (gpio == ROT_SW && absolute_time_diff_us(last_press_time, start_time) > DEBOUNCE_MS * 1000)
-        {
-            last_press_time = start_time;
-
-            queue_try_add(&event_queue, &gpio);
-        }
-
-    }
 
 // Init GPIOs
     void init_gpio_all(void)
@@ -74,6 +64,11 @@ void init_sys_variables(sys_info_t *systemVariables)
         gpio_init(OPTO_FORK);
         gpio_set_dir(OPTO_FORK, GPIO_IN);
         gpio_pull_up(OPTO_FORK);
+
+        // PIEZO SENSOR
+        gpio_init(PIEZO_SR);
+        gpio_set_dir(PIEZO_SR, GPIO_IN);
+        gpio_pull_up(PIEZO_SR);
 
         // MOTOR
         gpio_init(MTR_IN1);

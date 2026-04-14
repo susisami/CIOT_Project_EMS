@@ -32,6 +32,8 @@ add_executable(${PROJECT_NAME}
         Initializes/initialize.h
         Utilities/utils.c
         Utilities/utils.h
+        Dispense/run.c
+        Dispense/run.h
 )
 
 # Create map/bin/hex/uf2 files

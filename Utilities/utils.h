@@ -1,6 +1,5 @@
 #ifndef UTILS_H
 #define UTILS_H
-
 /* UTILITY FUNCTIONS */
 
     // STRING + STDIN CHECKS
@@ -10,5 +9,6 @@
 
     // NUMBER VALIDATION
     bool is_integer(const char *str);
+
 
 #endif //UTILS_H

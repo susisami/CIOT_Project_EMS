@@ -5,6 +5,7 @@
     #include <sys/unistd.h>
 
     // OWN HEADER FILES
+    #include "Dispense/run.h"
     #include "hardware/pwm.h" // IWYU pragma: keep
     #include "pico/stdlib.h" // IWYU pragma: keep
     #include "pico/util/queue.h"
@@ -14,26 +15,9 @@
     #include "Calibration/calib.h"
 
 
-/* CONSTANTS */
-    // SYSTEM VARIABLES
-    #define DISPENSE_COMPLETE 7
-
-
 /* ENUMS */
     // PROGRAM STATES
-    typedef enum {PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE} program_state_t;
-
-
-/* FUNCTION DECLARATIONS */
-    // ISR
-    void interrupt_callback(uint gpio, uint32_t events);
-
-
-/* GLOBAL VARIABLES */
-
-
-/* STRUCTURES */
-
+    typedef enum { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE } program_state_t;
 
 
 /* MAIN */
@@ -44,14 +28,17 @@ int main() {
     int irq_pin;
 
     sys_info_t systemVariables;
-    init_sys_variables(&systemVariables);    
-    
+    init_sys_variables(&systemVariables);
+
     // INIT FUNCTIONS
     init_gpio_all();
     stdio_init_all();
-    queue_init(&event_queue, sizeof(int), QUEUE_SIZE);
-    gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_FALL, true, &interrupt_callback);
 
+    queue_init(&event_queue, sizeof(int), QUEUE_SIZE);
+    queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE);
+
+    gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_FALL, true, &interrupt_callback);
+    gpio_set_irq_enabled_with_callback(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false, &interrupt_callback);
 
     printf("Boot\n");
     // MAIN PROGRAM LOOP
@@ -68,10 +55,11 @@ int main() {
 
                 if (systemVariables.button_pressed) // ROT_SW button pressed 
                 {
-                    while(queue_try_remove(&event_queue, &systemVariables.button_pressed));
+                    while (queue_try_remove(&event_queue, &systemVariables.button_pressed)){}
                     systemVariables.button_pressed = false;
                     gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, false);
                     gpio_put(LED_2, false);
+
                     program_state = CALIB;
                 } 
                 else // BLINK LED
@@ -110,12 +98,34 @@ int main() {
 
             case DISPENSE: // DISPENSE PILLS
 
-/*                while (absolute_time_diff_us() && dispense_position < DISPENSE_COMPLETE) {
+                while (systemVariables.dispenser_position < DISPENSE_ROUNDS) {
+                    if (absolute_time_diff_us(systemVariables.dispense_start_time, get_absolute_time()) >= DISPENSE_TIMEOUT_MS * 1000)
+                    {
+                        bool dispensed = false;
+                        systemVariables.dispense_start_time = get_absolute_time();
+                        gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
+                        run_motor(systemVariables.steps_per_rev, 1);
 
+                        sleep_ms(90); // calculated using formula t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
 
-                    dispense_position++;
+                        while (queue_try_remove(&pills_queue, &dispensed)) systemVariables.dispensed_pills++;
+
+                        if (!dispensed)
+                        {
+                           for (int i = 0; i < 5; i++)
+                           {
+                                gpio_put(LED_2, 1);
+                                sleep_ms(250);
+                                gpio_put(LED_2, 0);
+                                sleep_ms(250);
+                           }
+                        }
+
+                        gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false);
+                        systemVariables.dispenser_position++;
+                        dispensed = false;
+                    }
                 }
-*/
 
                 init_sys_variables(&systemVariables); // init variables for a fresh start
                 program_state = PRE_CALIB;
