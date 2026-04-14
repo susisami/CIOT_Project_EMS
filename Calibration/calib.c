@@ -1,42 +1,37 @@
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "pico/util/queue.h" // IWYU pragma: keep
 #include "../Macros/macros.h"
+#include "../Initializes/initialize.h"
 
 
-queue_t opto_queue;
-
-void calibrate_motor(int *steps_per_rev, int *opto_fork_value, int steps[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT]);
+void calibrate(int *steps_per_rev, int *irq_pin, int steps[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT]);
 void motor_step(int steps[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], int i);
 void motor_run(int steps_amount, int n, int steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], bool init_run, int init_steps);
 void gpio_callback(uint gpio, uint32_t events);
 
 
-/*
 
-*/
-
-
-int motor_calibration(void)
+void motor_calibration(sys_info_t *systemVariables)
 {
     int steps_per_rev = 0;
-    int opto_fork_value = 0;
+    int irq_pin = 0;
 
-    queue_init(&opto_queue, sizeof(bool), QUEUE_SIZE);
-
-    // Enable interrupt
-    gpio_set_irq_enabled_with_callback(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true, &gpio_callback);
+    queue_init(&event_queue, sizeof(int), QUEUE_SIZE);
 
     // motor driving
     int steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT] = { {1,0,0,0}, {1,1,0,0}, {0,1,0,0}, {0,1,1,0}, {0,0,1,0}, {0,0,1,1}, {0,0,0,1}, {1,0,0,1} };
 
 
-    calibrate_motor(&steps_per_rev, &opto_fork_value, steps_arr);
+    calibrate(&steps_per_rev, &irq_pin, steps_arr);
 
-    return steps_per_rev;
+
+    systemVariables->steps_per_rev = steps_per_rev;
+    systemVariables->isCalibrated = true;
+
 }
 
 
-void calibrate_motor(int *steps_per_rev, int *opto_fork_value, int steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT])
+void calibrate(int *steps_per_rev, int *irq_pin, int steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT])
 {
     // go until first opto edge -> start counting steps
     // save steps between 1st and 2nd opto
@@ -50,7 +45,7 @@ void calibrate_motor(int *steps_per_rev, int *opto_fork_value, int steps_arr[MTR
     bool initialized = false;
 
     gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true);
-    while (queue_try_remove(&opto_queue, &opto_fork_value));
+    while (queue_try_remove(&event_queue, &irq_pin));
 
     while (!initialized)
     {
@@ -59,21 +54,24 @@ void calibrate_motor(int *steps_per_rev, int *opto_fork_value, int steps_arr[MTR
             motor_step(steps_arr, i);
 
             // check queue after each step
-            while (queue_try_remove(&opto_queue, &opto_fork_value))
+            while (queue_try_remove(&event_queue, &irq_pin))
             {
-                if (counting_first)
+                if (irq_pin == OPTO_FORK)
                 {
-                    counting_second = true;
-                    counting_first = false;
-                }
-                else if (counting_second) 
-                {
-                    initialized = true;
-                    counting_second = false;
-                }
-                else
-                {
-                    counting_first = true;
+                    if (counting_first)
+                    {
+                        counting_second = true;
+                        counting_first = false;
+                    }
+                    else if (counting_second) 
+                    {
+                        initialized = true;
+                        counting_second = false;
+                    }
+                    else
+                    {
+                        counting_first = true;
+                    }
                 }
             }
 
@@ -103,7 +101,6 @@ void calibrate_motor(int *steps_per_rev, int *opto_fork_value, int steps_arr[MTR
     }
     
     motor_run(0, 0, steps_arr, true, correction_steps);
-
 
     gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, false);
 }
@@ -152,11 +149,4 @@ void motor_run(int steps_amount, int n, int steps_arr[MTR_PHASE_AMOUNT][MTR_INPU
             sleep_us(MTR_SLEEP_US);
         }
     }
-}
-
-
-void gpio_callback(uint gpio, uint32_t events)
-{
-    bool value = true;
-    queue_try_add(&opto_queue, &value);
 }

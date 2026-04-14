@@ -26,30 +26,14 @@
 
 /* FUNCTION DECLARATIONS */
     // ISR
-    void irq_rot_sw(uint gpio, uint32_t events);
+    void interrupt_callback(uint gpio, uint32_t events);
 
 
 /* GLOBAL VARIABLES */
-    // ISR TIMEOUTS
-    static absolute_time_t last_press_time;
 
 
 /* STRUCTURES */
-    // SYSTEM STRUCTURE
-    typedef struct SystemInformation
-    {
-        bool isCalibrated;
-        uint dispenser_position;
-        uint avg_steps;
-        uint steps_per_rev; // total steps per full cycle (approx. 4096)
-        bool pressed;
-        bool led_state;
 
-    } sys_info_t;
-
-
-/* SYSTEM QUEUES */
-    static queue_t event_queue;
 
 
 /* MAIN */
@@ -57,6 +41,7 @@ int main() {
 
     /* SYSTEM VARIABLES */
     program_state_t program_state = PRE_CALIB;
+    int irq_pin;
 
     sys_info_t systemVariables;
     systemVariables.pressed = false;
@@ -70,40 +55,42 @@ int main() {
     // INIT FUNCTIONS
     init_gpio_all();
     stdio_init_all();
-    queue_init(&event_queue, sizeof(bool), QUEUE_SIZE);
-    gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_FALL, true, &irq_rot_sw);
+    queue_init(&event_queue, sizeof(int), QUEUE_SIZE);
+    gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_FALL, true, &interrupt_callback);
 
 
     printf("Boot\n");
     // MAIN PROGRAM LOOP
     while (true)
     {
-        queue_try_remove(&event_queue, &systemVariables.pressed);
+        if (queue_try_remove(&event_queue, &irq_pin) && irq_pin == ROT_SW) {
+            systemVariables.pressed = true;
+        }
 
 
         switch (program_state) {
 
             case PRE_CALIB:
 
-                // TOGGLE LED
-                systemVariables.led_state = !systemVariables.led_state; 
-                gpio_put(LED_2, systemVariables.led_state);
-                sleep_ms(LED_BLINK_MS); // delays the calibration after button press, find a solution
-                
-                if (systemVariables.pressed) { 
+                if (systemVariables.pressed) // ROT_SW PRESSED 
+                {
                     program_state = CALIB;
+                    while(queue_try_remove(&event_queue, &systemVariables.pressed));
                     systemVariables.pressed = false;
                     gpio_put(LED_2, false);
+                } 
+                else // BLINK LED
+                { 
+                    systemVariables.led_state = !systemVariables.led_state; 
+                    gpio_put(LED_2, systemVariables.led_state);
+                    sleep_ms(LED_BLINK_MS); 
                 }
                 break;
 
 
             case CALIB:
 
-                systemVariables.steps_per_rev = motor_calibration();
-
-                // TODO: fix the callback-bug
-                gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_RISE, true, &irq_rot_sw); // temporary fix, will be removed
+                motor_calibration(&systemVariables);
 
                 program_state = PRE_DISPENSE;
                 gpio_put(LED_2, true);
@@ -132,21 +119,5 @@ int main() {
 
                 break;
         }
-    }
-}
-
-//ISRS
-
-
-void irq_rot_sw(uint gpio, uint32_t events)
-{
-    const absolute_time_t start_time = get_absolute_time();
-
-    if (absolute_time_diff_us(last_press_time, start_time) > DEBOUNCE_MS * 1000)
-    {
-        last_press_time = start_time;
-
-        const bool press = true;
-        queue_try_add(&event_queue, &press);
     }
 }
