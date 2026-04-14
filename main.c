@@ -44,13 +44,7 @@ int main() {
     int irq_pin;
 
     sys_info_t systemVariables;
-    systemVariables.pressed = false;
-    systemVariables.led_state = false;
-    systemVariables.isCalibrated = false;
-    systemVariables.dispenser_position = 0;
-    systemVariables.avg_steps = 0;
-    systemVariables.steps_per_rev = 0;
-    
+    init_sys_variables(&systemVariables);    
     
     // INIT FUNCTIONS
     init_gpio_all();
@@ -63,51 +57,53 @@ int main() {
     // MAIN PROGRAM LOOP
     while (true)
     {
+        // read queue
         if (queue_try_remove(&event_queue, &irq_pin) && irq_pin == ROT_SW) {
-            systemVariables.pressed = true;
+            systemVariables.button_pressed = true;
         }
-
 
         switch (program_state) {
 
-            case PRE_CALIB:
+            case PRE_CALIB: // BLINK LED UNTIL BUTTON IS PRESSED
 
-                if (systemVariables.pressed) // ROT_SW PRESSED 
+                if (systemVariables.button_pressed) // ROT_SW button pressed 
                 {
-                    program_state = CALIB;
-                    while(queue_try_remove(&event_queue, &systemVariables.pressed));
-                    systemVariables.pressed = false;
+                    while(queue_try_remove(&event_queue, &systemVariables.button_pressed));
+                    systemVariables.button_pressed = false;
+                    gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, false);
                     gpio_put(LED_2, false);
+                    program_state = CALIB;
                 } 
                 else // BLINK LED
                 { 
-                    systemVariables.led_state = !systemVariables.led_state; 
-                    gpio_put(LED_2, systemVariables.led_state);
+                    systemVariables.led_on = !systemVariables.led_on; 
+                    gpio_put(LED_2, systemVariables.led_on);
                     sleep_ms(LED_BLINK_MS); 
                 }
                 break;
 
 
-            case CALIB:
+            case CALIB: // CALIBRATE MOTOR
 
                 motor_calibration(&systemVariables);
 
-                program_state = PRE_DISPENSE;
+                gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
                 gpio_put(LED_2, true);
+                program_state = PRE_DISPENSE;
                 break;
 
 
-            case PRE_DISPENSE:
+            case PRE_DISPENSE: // WAIT FOR A BUTTON PRESS
 
-                if (systemVariables.pressed) {
-                    gpio_put(LED_2, 0);
+                if (systemVariables.button_pressed) {
+                    systemVariables.button_pressed = false;
+                    gpio_put(LED_2, false);
                     program_state = DISPENSE;
-                    systemVariables.pressed = false;
                 }
                 break;
 
 
-            case DISPENSE:
+            case DISPENSE: // DISPENSE PILLS
 
 /*                while (absolute_time_diff_us() && dispense_position < DISPENSE_COMPLETE) {
 
@@ -115,8 +111,9 @@ int main() {
                     dispense_position++;
                 }
 */
-                program_state = PRE_CALIB;
 
+                init_sys_variables(&systemVariables); // init variables for a fresh start
+                program_state = PRE_CALIB;
                 break;
         }
     }

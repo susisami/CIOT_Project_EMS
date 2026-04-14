@@ -6,7 +6,7 @@
 
 void calibrate(int *steps_per_rev, int *irq_pin, int steps[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT]);
 void motor_step(int steps[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], int i);
-void motor_run(int steps_amount, int n, int steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], bool init_run, int init_steps);
+void motor_run(int steps_amount, int n, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], bool init_run, int init_steps);
 void gpio_callback(uint gpio, uint32_t events);
 
 
@@ -16,13 +16,12 @@ void motor_calibration(sys_info_t *systemVariables)
     int steps_per_rev = 0;
     int irq_pin = 0;
 
-    queue_init(&event_queue, sizeof(int), QUEUE_SIZE);
 
     // motor driving
-    int steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT] = { {1,0,0,0}, {1,1,0,0}, {0,1,0,0}, {0,1,1,0}, {0,0,1,0}, {0,0,1,1}, {0,0,0,1}, {1,0,0,1} };
+    int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT] = { {1,0,0,0}, {1,1,0,0}, {0,1,0,0}, {0,1,1,0}, {0,0,1,0}, {0,0,1,1}, {0,0,0,1}, {1,0,0,1} };
 
 
-    calibrate(&steps_per_rev, &irq_pin, steps_arr);
+    calibrate(&steps_per_rev, &irq_pin, mtr_steps_arr);
 
 
     systemVariables->steps_per_rev = steps_per_rev;
@@ -31,7 +30,7 @@ void motor_calibration(sys_info_t *systemVariables)
 }
 
 
-void calibrate(int *steps_per_rev, int *irq_pin, int steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT])
+void calibrate(int *steps_per_rev, int *irq_pin, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT])
 {
     // go until first opto edge -> start counting steps
     // save steps between 1st and 2nd opto
@@ -51,7 +50,7 @@ void calibrate(int *steps_per_rev, int *irq_pin, int steps_arr[MTR_PHASE_AMOUNT]
     {
         for (int i = 0; i < 8; i++)
         {
-            motor_step(steps_arr, i);
+            motor_step(mtr_steps_arr, i);
 
             // check queue after each step
             while (queue_try_remove(&event_queue, &irq_pin))
@@ -100,23 +99,23 @@ void calibrate(int *steps_per_rev, int *irq_pin, int steps_arr[MTR_PHASE_AMOUNT]
         correction_steps = count_second / -2; // reverse half of the second step count
     }
     
-    motor_run(0, 0, steps_arr, true, correction_steps);
+    motor_run(0, 0, mtr_steps_arr, true, correction_steps);
 
     gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, false);
 }
 
 
 
-void motor_step(int steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], int i)
+void motor_step(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], int i)
 {
-    gpio_put(MTR_IN1, steps_arr[i][0]);
-    gpio_put(MTR_IN2, steps_arr[i][1]);
-    gpio_put(MTR_IN3, steps_arr[i][2]);
-    gpio_put(MTR_IN4, steps_arr[i][3]);
+    gpio_put(MTR_IN1, mtr_steps_arr[i][0]);
+    gpio_put(MTR_IN2, mtr_steps_arr[i][1]);
+    gpio_put(MTR_IN3, mtr_steps_arr[i][2]);
+    gpio_put(MTR_IN4, mtr_steps_arr[i][3]);
 }
 
 
-void motor_run(int steps_amount, int n, int steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], bool init_run, int init_steps)
+void motor_run(int steps_amount, int n, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], bool init_run, int init_steps)
 {
     int steps_total = 0;
 
@@ -136,7 +135,7 @@ void motor_run(int steps_amount, int n, int steps_arr[MTR_PHASE_AMOUNT][MTR_INPU
         for (int steps_left = steps_total; steps_left > 0; steps_left--) // correct the initial position to the anti-clockwise direction
         {
             int step_nr = steps_left % 8;
-            motor_step(steps_arr, step_nr);
+            motor_step(mtr_steps_arr, step_nr);
             sleep_us(MTR_SLEEP_US);
         }
     }
@@ -145,7 +144,7 @@ void motor_run(int steps_amount, int n, int steps_arr[MTR_PHASE_AMOUNT][MTR_INPU
         for (int steps_left = 0; steps_left < steps_total; steps_left++) // correct the initial position to the clockwise direction
         {
             int step_nr = steps_left % 8;
-            motor_step(steps_arr, step_nr);
+            motor_step(mtr_steps_arr, step_nr);
             sleep_us(MTR_SLEEP_US);
         }
     }

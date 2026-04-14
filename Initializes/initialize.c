@@ -3,6 +3,33 @@
 #include "pico/util/queue.h"
 
 
+typedef struct SystemInformation
+{
+    bool isCalibrated; 
+
+    uint avg_steps;
+    // total steps per full cycle (approx. 4096)
+    uint steps_per_rev; 
+    // position from 0 to steps_per_rev (calibrated=0, increasing clockwise)
+    uint dispenser_position; 
+    // button pressed
+    bool button_pressed;
+    //
+    bool led_on;
+
+} sys_info_t;
+
+
+void init_sys_variables(sys_info_t *systemVariables)
+{
+    systemVariables->button_pressed = false;
+    systemVariables->led_on = false;
+    systemVariables->isCalibrated = false;
+    systemVariables->dispenser_position = 0;
+    systemVariables->avg_steps = 0;
+    systemVariables->steps_per_rev = 0;
+}
+
 // Interrupt callback function for  ROT_SW  &&  OPTO_FORK
     queue_t event_queue;
     absolute_time_t last_press_time;
