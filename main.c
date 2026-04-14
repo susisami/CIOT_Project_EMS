@@ -78,7 +78,12 @@ int main() {
                 { 
                     systemVariables.led_on = !systemVariables.led_on; 
                     gpio_put(LED_2, systemVariables.led_on);
-                    sleep_ms(LED_BLINK_MS); 
+
+                    // sleep LED_BLINK_MS, stop sleeping if queue is not empty (== button has been pressed)
+                    for (int i = 0; i < LED_BLINK_MS && !queue_try_peek(&event_queue, &irq_pin); i++)
+                    {
+                        sleep_ms(1); 
+                    }
                 }
                 break;
 

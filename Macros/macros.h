@@ -19,7 +19,7 @@
 
 
     // TIMEOUTS
-    #define LED_BLINK_MS 500
+    #define LED_BLINK_MS 1000
     #define DEBOUNCE_MS 300
     #define MTR_SLEEP_US 1100
 
