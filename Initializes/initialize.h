@@ -2,7 +2,6 @@
 #define INITIALIZE_H
 
 
-
-void gpio_init_all(void);
+void init_gpio_all(void);
 
 #endif //INITIALIZE_H

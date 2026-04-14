@@ -1,13 +1,7 @@
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "pico/util/queue.h" // IWYU pragma: keep
-#include "../Initializes/initialize.h" 
 #include "../Macros/macros.h"
 
-
-#define QUEUE_SIZE 10
-#define MTR_INPUT_AMOUNT 4
-#define MTR_PHASE_AMOUNT 8
-#define MTR_SLEEP_US 1000
 
 queue_t opto_queue;
 
@@ -27,9 +21,7 @@ int motor_calibration(void)
     int steps_per_rev = 0;
     int opto_fork_value = 0;
 
-    stdio_init_all();
-    gpio_init_all();
-    queue_init(&opto_queue, sizeof(int), QUEUE_SIZE);
+    queue_init(&opto_queue, sizeof(bool), QUEUE_SIZE);
 
     // Enable interrupt
     gpio_set_irq_enabled_with_callback(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true, &gpio_callback);
@@ -58,7 +50,7 @@ void calibrate_motor(int *steps_per_rev, int *opto_fork_value, int steps_arr[MTR
     bool initialized = false;
 
     gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true);
-    while (queue_try_remove(&opto_queue, &opto_fork_value) == true);
+    while (queue_try_remove(&opto_queue, &opto_fork_value));
 
     while (!initialized)
     {
@@ -67,7 +59,7 @@ void calibrate_motor(int *steps_per_rev, int *opto_fork_value, int steps_arr[MTR
             motor_step(steps_arr, i);
 
             // check queue after each step
-            while (queue_try_remove(&opto_queue, &opto_fork_value) == true)
+            while (queue_try_remove(&opto_queue, &opto_fork_value))
             {
                 if (counting_first)
                 {
@@ -165,6 +157,6 @@ void motor_run(int steps_amount, int n, int steps_arr[MTR_PHASE_AMOUNT][MTR_INPU
 
 void gpio_callback(uint gpio, uint32_t events)
 {
-    int value = 1;
+    bool value = true;
     queue_try_add(&opto_queue, &value);
 }
