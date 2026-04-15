@@ -5,9 +5,9 @@
 #include "../Initializes/initialize.h"
 
 
-void calibrate(int *steps_per_rev, int *irq_pin, int steps[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT]);
-void motor_step(int steps[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], int i);
-void motor_run(int steps_amount, int n, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], bool init_run, int init_steps);
+void calibrate(int *steps_per_rev, int *opto_fork_value, int steps[MTR_PHASE_AMOUNT][MTR_COILS]);
+void motor_step(int steps[MTR_PHASE_AMOUNT][MTR_COILS], int i);
+void motor_run(int steps_amount, int n, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], bool init_run, int init_steps);
 void gpio_callback(uint gpio, uint32_t events);
 
 
@@ -15,14 +15,17 @@ void gpio_callback(uint gpio, uint32_t events);
 void motor_calibration(sys_info_t *systemVariables)
 {
     int steps_per_rev = 0;
-    int irq_pin = 0;
+    int opto_fork_value = 0;
 
 
     // motor driving
-    int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT] = { {1,0,0,0}, {1,1,0,0}, {0,1,0,0}, {0,1,1,0}, {0,0,1,0}, {0,0,1,1}, {0,0,0,1}, {1,0,0,1} };
+    int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS] = { {1,0,0,0}, {1,1,0,0}, {0,1,0,0}, {0,1,1,0}, {0,0,1,0}, {0,0,1,1}, {0,0,0,1}, {1,0,0,1} };
 
+    queue_init(&opto_queue, sizeof(bool), QUEUE_SIZE);
 
-    calibrate(&steps_per_rev, &irq_pin, mtr_steps_arr);
+    
+
+    calibrate(&steps_per_rev, &opto_fork_value, mtr_steps_arr);
 
 
     systemVariables->steps_per_rev = steps_per_rev;
@@ -31,7 +34,7 @@ void motor_calibration(sys_info_t *systemVariables)
 }
 
 
-void calibrate(int *steps_per_rev, int *irq_pin, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT])
+void calibrate(int *steps_per_rev, int *opto_fork_value, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS])
 {
     // go until first opto edge -> start counting steps
     // save steps between 1st and 2nd opto
@@ -45,7 +48,7 @@ void calibrate(int *steps_per_rev, int *irq_pin, int mtr_steps_arr[MTR_PHASE_AMO
     bool initialized = false;
 
     gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true);
-    while (queue_try_remove(&event_queue, &irq_pin));
+    while (queue_try_remove(&opto_queue, &opto_fork_value));
 
     while (!initialized)
     {
@@ -54,9 +57,9 @@ void calibrate(int *steps_per_rev, int *irq_pin, int mtr_steps_arr[MTR_PHASE_AMO
             motor_step(mtr_steps_arr, i);
 
             // check queue after each step
-            while (queue_try_remove(&event_queue, &irq_pin))
+            while (queue_try_remove(&opto_queue, &opto_fork_value))
             {
-                if (irq_pin == OPTO_FORK)
+                if (opto_fork_value)
                 {
                     if (counting_first)
                     {
@@ -107,7 +110,7 @@ void calibrate(int *steps_per_rev, int *irq_pin, int mtr_steps_arr[MTR_PHASE_AMO
 
 
 
-void motor_step(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], int i)
+void motor_step(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int i)
 {
     gpio_put(MTR_IN1, mtr_steps_arr[i][0]);
     gpio_put(MTR_IN2, mtr_steps_arr[i][1]);
@@ -116,7 +119,7 @@ void motor_step(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], int i)
 }
 
 
-void motor_run(int steps_amount, int n, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT], bool init_run, int init_steps)
+void motor_run(int steps_amount, int n, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], bool init_run, int init_steps)
 {
     int steps_total = 0;
 

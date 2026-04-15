@@ -6,8 +6,11 @@
 
 /* QUEUES */
 
-    // INTERRUPT QUEUE FOR ROT SW & OPTO FORK (GP12, GP28)
-    extern queue_t event_queue;
+    // INTERRUPT QUEUE FOR ROT SW (GP12)
+    extern queue_t button_queue;
+
+    // INTERRUPT QUEUE FOR OPTO FORK (GP28)
+    extern queue_t opto_queue;
 
     //INTERRUPT QUEUE FOR PIEZO SENSOR (GP27)
     extern queue_t pills_queue;

@@ -1,6 +1,5 @@
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "../Macros/macros.h" 
-#include "pico/util/queue.h"
 
 typedef struct SystemInformation
 {

@@ -1,5 +1,7 @@
 #ifndef INITIALIZE_H
 #define INITIALIZE_H
+#include "pico/stdlib.h" // IWYU pragma: keep
+
 /* STRUCTURES */
 
     // SYSTEM STRUCTURE
@@ -7,24 +9,25 @@
     {
         bool isCalibrated;
 
-        uint avg_steps;
         // total steps per full cycle (approx. 4096)
+        uint avg_steps;
 
-        uint steps_per_rev;
         // position from 0 to steps_per_rev (calibrated=0, increasing clockwise)
+        uint steps_per_rev;
 
-        absolute_time_t dispense_start_time;
         // Timestamp for controlling the dispense happening at intervals.
+        absolute_time_t dispense_start_time;
 
-        uint dispenser_position;
         // Marks the current total amount of steps in the mode DISPENSE
+        uint dispenser_position;
 
-        uint dispensed_pills;
         // Amount of pills that has been dispensed
+        uint dispensed_pills;
 
+        // 
         bool button_pressed;
-        //
 
+        // 
         bool led_on;
 
     } sys_info_t;

@@ -34,7 +34,7 @@ int main() {
     init_gpio_all();
     stdio_init_all();
 
-    queue_init(&event_queue, sizeof(int), QUEUE_SIZE);
+    queue_init(&button_queue, sizeof(bool), QUEUE_SIZE);
     queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE);
 
     gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_FALL, true, &interrupt_callback);
@@ -45,9 +45,7 @@ int main() {
     while (true)
     {
         // read queue
-        if (queue_try_remove(&event_queue, &irq_pin) && irq_pin == ROT_SW) {
-            systemVariables.button_pressed = true;
-        }
+        queue_try_remove(&button_queue, &systemVariables.button_pressed);
 
         switch (program_state) {
 
@@ -55,7 +53,7 @@ int main() {
 
                 if (systemVariables.button_pressed) // ROT_SW button pressed 
                 {
-                    while (queue_try_remove(&event_queue, &systemVariables.button_pressed)){}
+                    while (queue_try_remove(&button_queue, &systemVariables.button_pressed));
                     systemVariables.button_pressed = false;
                     gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, false);
                     gpio_put(LED_2, false);
@@ -68,7 +66,7 @@ int main() {
                     gpio_put(LED_2, systemVariables.led_on);
 
                     // sleep LED_BLINK_MS, stop sleeping if queue is not empty (== button has been pressed)
-                    for (int i = 0; i < LED_BLINK_MS && !queue_try_peek(&event_queue, &irq_pin); i++)
+                    for (int i = 0; i < LED_BLINK_MS && !queue_try_peek(&button_queue, &irq_pin); i++)
                     {
                         sleep_ms(1); 
                     }

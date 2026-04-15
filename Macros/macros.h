@@ -24,7 +24,7 @@
     #define LED_BLINK_MS 1000
     #define DEBOUNCE_MS 300
     #define MTR_SLEEP_US 1100
-    #define DISPENSE_TIMEOUT_MS 30000
+    #define DISPENSE_TIMEOUT_MS 5000 // 30 000 ms
 
 
     // INTERRUPTS
@@ -32,8 +32,7 @@
 
     
     // MOTOR_CALIBRATION & RUN
-    #define COILS 4
-    #define MTR_INPUT_AMOUNT 4
+    #define MTR_COILS 4
     #define MTR_PHASE_AMOUNT 8
     #define MTR_CALIB_ROTATIONS 3
     #define DISPENSE_ROUNDS 7

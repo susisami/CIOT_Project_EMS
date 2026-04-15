@@ -14,7 +14,7 @@
 
 int stepper_motor_run(const uint direction)
 {
-    static const int driving_sequence[MTR_PHASE_AMOUNT][MTR_INPUT_AMOUNT] = {
+    static const int driving_sequence[MTR_PHASE_AMOUNT][MTR_COILS] = {
         {1,0,0,0},
         {1,1,0,0},
         {0,1,0,0},
