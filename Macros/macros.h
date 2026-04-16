@@ -24,7 +24,7 @@
     #define LED_BLINK_SLOW_MS 1000
     #define LED_BLINK_FAST_MS 100
     #define MTR_SLEEP_US 1100 // sleep between each motor step
-    #define DISPENSE_TIMEOUT_MS 1000 // 30 000 ms
+    #define DISPENSE_TIMEOUT_MS 3000 // 30 000 ms
     #define PIEZO_TIMEOUT_MS 90 // t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
 
     // INTERRUPTS
