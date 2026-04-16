@@ -53,9 +53,7 @@ int main() {
 
                 if (systemVariables.button_pressed) // ROT_SW button pressed 
                 {
-                    while (queue_try_remove(&button_queue, &systemVariables.button_pressed));
                     systemVariables.button_pressed = false;
-                    gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, false);
                     gpio_put(LED_2, false);
 
                     program_state = CALIB;
@@ -77,9 +75,9 @@ int main() {
             case CALIB: // CALIBRATE MOTOR
 
                 motor_calibration(&systemVariables);
-
+                gpio_put(LED_2, 1);
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
-                gpio_put(LED_2, true);
+
                 program_state = PRE_DISPENSE;
                 break;
 
@@ -89,6 +87,7 @@ int main() {
                 if (systemVariables.button_pressed) {
                     systemVariables.button_pressed = false;
                     gpio_put(LED_2, false);
+
                     program_state = DISPENSE;
                 }
                 break;
@@ -104,7 +103,7 @@ int main() {
                         gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
                         run_motor(systemVariables.steps_per_rev, 1);
 
-                        sleep_ms(90); // calculated using formula t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
+                        sleep_ms(PIEZO_TIMEOUT_MS);
 
                         while (queue_try_remove(&pills_queue, &dispensed)) systemVariables.dispensed_pills++;
 
@@ -127,6 +126,7 @@ int main() {
 
                 init_sys_variables(&systemVariables); // init variables for a fresh start
                 program_state = PRE_CALIB;
+                gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
                 break;
         }
     }

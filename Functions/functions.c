@@ -34,7 +34,7 @@
         else if (gpio == ROT_SW && absolute_time_diff_us(last_press_time, start_time) > DEBOUNCE_MS * 1000)
         {
             last_press_time = start_time;
-            
+            gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, false);
             queue_try_add(&button_queue, &value);
         }
 
