@@ -4,12 +4,15 @@
 #include "pico/util/queue.h"
 
 
-/* QUEUES */
+// INTERRUPT QUEUE FOR ROT SW (GP12)
+queue_t button_queue;
 
-    // IRS QUEUES FOR ROT_SW, OPTO_FORK & PIEZO SENSOR
-    queue_t button_queue;
-    queue_t opto_queue;
-    queue_t pills_queue;
+// INTERRUPT QUEUE FOR OPTO FORK (GP28)
+queue_t opto_queue;
+
+//INTERRUPT QUEUE FOR PIEZO SENSOR (GP27)
+queue_t pills_queue;
+
 
 
 /* FUNCTIONS */

@@ -1,7 +1,7 @@
 #ifndef BLINK_RUN_H
 #define BLINK_RUN_H
 /* LIBRARIES */
-#include "pico/util/queue.h"
+#include "pico/util/queue.h" // IWYU pragma: keep
 
 
 /* ENUMS */
