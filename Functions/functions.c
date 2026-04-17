@@ -19,7 +19,7 @@
     {
         const bool value = true;
 
-        if (gpio == OPTO_FORK) // opto fork doesn't need debounce
+        if (gpio == OPTO_FORK) 
         {
             queue_try_add(&opto_queue, &value);
         }
