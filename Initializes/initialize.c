@@ -16,6 +16,16 @@ void init_sys_variables(sys_info_t *systemVariables)
     systemVariables->led_on = false;
 }
 
+// Init LoRa module
+void init_lora(lora_module_t *lora_module)
+{
+    lora_init(lora_module);
+    if (lora_connect(lora_module)) {
+        lora_send_event(lora_module, EVENT_BOOT, NULL);
+    }
+    printf("Starting main loop\n");
+}
+
 
 // Init GPIOs
     void init_gpio_all(void)
