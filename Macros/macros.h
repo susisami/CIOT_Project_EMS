@@ -38,7 +38,23 @@
     #define DISPENSER_WHEEL_DIVISOR 8 // dispenser wheel slots
     #define CALIBRATION_ROTATIONS 2 // how many rotations to count the average steps from
 
-
+    // LORA
+    #define LORA_UART_ID uart1
+    #define LORA_BAUD_RATE 9600
+    #define LORA_TX_PIN 4
+    #define LORA_RX_PIN 5
+    #define LORA_RESPONSE_TIMEOUT_MS 2000
+    #define LORA_JOIN_TIMEOUT_MS 20000
+    #define LORA_MAX_RETRY_ATTEMPTS 5
+    #define LORA_BUFFER_SIZE 128
+    #define LORA_MESSAGE_SIZE 128
+    #define LORA_COMMAND_SIZE 192
+    #define LORA_SMALL_BUFFER 64
+    #define LORA_JOIN_COMMAND_LENGTH 9
+    #define LORA_MSG_SEND_TIMEOUT_MS 5000
+    #define LORA_APP_KEY ""  // APPkey from teacher
+    #define LORA_DATA_RATE 5
+    #define LORA_PORT 8
 
 
 #endif //MACROS_H
