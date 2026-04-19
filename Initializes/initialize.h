@@ -1,6 +1,7 @@
 #ifndef INITIALIZE_H
 #define INITIALIZE_H
 #include "pico/stdlib.h" // IWYU pragma: keep
+#include "../Lora/lora.h"
 
 /* STRUCTURES */
 
@@ -39,6 +40,9 @@
 
     // init systemVariables
     void init_sys_variables(sys_info_t *systemVariables);
+
+    // init LoRa module
+    void init_lora(lora_module_t *lora_module);
 
 
 #endif //INITIALIZE_H
