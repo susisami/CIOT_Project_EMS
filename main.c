@@ -5,14 +5,14 @@
     #include <sys/unistd.h>
 
     // OWN HEADER FILES
-    #include "Dispense/run.h"
     #include "hardware/pwm.h" // IWYU pragma: keep
     #include "pico/stdlib.h" // IWYU pragma: keep
     #include "pico/util/queue.h"
-    #include "Functions/functions.h" // IWYU pragma: keep
-    #include "Macros/macros.h" 
+    #include "Macros/macros.h"
     #include "Initializes/initialize.h"
     #include "Calibration/calib.h"
+    #include "Functions/functions.h" // IWYU pragma: keep
+    #include "Dispense/run.h"
 
 
 /* ENUMS */
@@ -33,6 +33,7 @@ int main() {
     // INIT FUNCTIONS
     init_gpio_all();
     stdio_init_all();
+    
 
     queue_init(&button_queue, sizeof(bool), QUEUE_SIZE);
     queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE);
@@ -41,6 +42,10 @@ int main() {
     gpio_set_irq_enabled_with_callback(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false, &interrupt_callback);
 
     printf("Boot\n");
+
+    
+    lora_module_t lora_module;
+    init_lora(&lora_module);
     // MAIN PROGRAM LOOP
     while (true)
     {
@@ -50,6 +55,7 @@ int main() {
         switch (program_state) {
 
             case PRE_CALIB: // BLINK LED UNTIL BUTTON IS PRESSED
+
 
                 if (systemVariables.button_pressed) // ROT_SW button pressed 
                 {
@@ -109,6 +115,7 @@ int main() {
 
                         if (!dispensed)
                         {
+                           lora_send_event(&lora_module, EVENT_PILL_NOT_DISPENSED, NULL);
                            for (int i = 0; i < 5; i++)
                            {
                                 gpio_put(LED_2, 1);
@@ -117,6 +124,10 @@ int main() {
                                 sleep_ms(LED_BLINK_FAST_MS);
                            }
                         }
+                        else
+                        {
+                           lora_send_event(&lora_module, EVENT_PILL_DISPENSED, NULL);
+                        }
 
                         gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false);
                         systemVariables.dispenser_position++;
@@ -124,6 +135,7 @@ int main() {
                     }
                 }
 
+                lora_send_event(&lora_module, EVENT_DISPENSER_EMPTY, NULL);
                 init_sys_variables(&systemVariables); // init variables for a fresh start
                 program_state = PRE_CALIB;
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
