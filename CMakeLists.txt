@@ -34,6 +34,8 @@ add_executable(${PROJECT_NAME}
         Utilities/utils.h
         Dispense/run.c
         Dispense/run.h
+        LoRa/lora.c
+        LoRa/lora.h
 )
 
 # Create map/bin/hex/uf2 files
@@ -44,6 +46,7 @@ target_link_libraries(${PROJECT_NAME}
         pico_stdlib
         hardware_pwm
         hardware_gpio
+        hardware_uart
 )
 
 # Disable usb output, enable uart output
