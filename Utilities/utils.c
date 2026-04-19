@@ -46,6 +46,20 @@
         }
     }
 
+    // REMOVE SPECIFIC CHARACTER FROM STRING
+    void remove_char(char *str, char c)
+    {
+        int j = 0;
+        for (int i = 0; str[i] != '\0'; i++)
+        {
+            if (str[i] != c)
+            {
+                str[j++] = str[i];
+            }
+        }
+        str[j] = '\0';
+    }
+
     // VALIDATES INPUT AS A VALID LONG INTEGER = TRUE, OR FALSE
     bool is_integer(const char *str)
     {
