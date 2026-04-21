@@ -1,7 +1,7 @@
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "../Macros/macros.h" 
 #include "initialize.h"
-
+#include <stdio.h>
 
 
 void init_sys_variables(sys_info_t *systemVariables)
