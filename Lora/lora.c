@@ -14,6 +14,18 @@ static void uart_flush(void) {
 }
 
 
+void lora_process_deveui(char *input, char *output) {
+    int j = 0;
+
+    for (int i = 0; input[i] != '\0'; i++) {
+        if (input[i] != ':') {
+            output[j++] = (char)tolower((unsigned char)input[i]);
+        }
+    }
+
+    output[j] = '\0';
+}
+
 // Validate single response line
 static bool lora_check_response(const char *command, const char *response) {
     if (!response || response[0] == '\0')
@@ -111,6 +123,9 @@ void lora_init(lora_module_t *module) {
     module->joined = false;
     module->retry_count = 0;
     module->deveui[0] = '\0';
+
+    // 1 sec delay for LoRa module to boot
+    sleep_ms(LED_BLINK_SLOW_MS);
 }
 
 
@@ -147,7 +162,18 @@ bool lora_connect(lora_module_t *module) {
     module->state = LORA_TESTING;
     printf("[LoRa] Testing module...\n");
 
-    if (!lora_send_command("AT", buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS)) {
+    // Retry AT command in case module is still booting
+    bool at_success = false;
+    for (int i = 0; i < 3; i++) {
+        if (lora_send_command("AT", buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS)) {
+            at_success = true;
+            break;
+        }
+        printf("[LoRa] AT retry %d/3\n", i + 1);
+        sleep_ms(1000);
+    }
+
+    if (!at_success) {
         module->state = LORA_ERROR;
         return false;
     }
@@ -155,7 +181,23 @@ bool lora_connect(lora_module_t *module) {
     lora_send_command("AT+VER", buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS);
     printf("[LoRa] Version: %s\n", buf);
 
-    lora_send_command("AT+ID=DevEui", buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS);
+    if (lora_send_command("AT+ID=DevEui", buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS)) {
+
+        char *comma = strchr(buf, ',');
+
+        if (comma != NULL) {
+            comma++; // move past ','
+
+            while (*comma == ' ') comma++; // skip spaces
+
+            lora_process_deveui(comma, module->deveui);
+
+            printf("[LoRa] DevEui: %s\n", module->deveui);
+        } else {
+            printf("[LoRa] Invalid DevEui format: %s\n", buf);
+            return false;
+        }
+    }
 
     module->state = LORA_CONFIGURING;
     printf("[LoRa] Configuring...\n");
@@ -261,3 +303,5 @@ const char *lora_event_to_string(lora_event_t event) {
         default: return "UNKNOWN";
     }
 }
+
+
