@@ -52,7 +52,6 @@
     #define LORA_SMALL_BUFFER 64
     #define LORA_JOIN_COMMAND_LENGTH 9
     #define LORA_MSG_SEND_TIMEOUT_MS 5000
-    #define LORA_APP_KEY ""  // APPkey from teacher
     #define LORA_DATA_RATE 5
     #define LORA_PORT 8
 

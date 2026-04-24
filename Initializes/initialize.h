@@ -1,7 +1,7 @@
 #ifndef INITIALIZE_H
 #define INITIALIZE_H
 #include "pico/stdlib.h" // IWYU pragma: keep
-#include "../Lora/lora.h"
+#include "../LoRa/lora.h"
 
 /* STRUCTURES */
 

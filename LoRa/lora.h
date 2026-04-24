@@ -2,8 +2,9 @@
 #define LORA_H
 
 #include <stdbool.h>
-#include "pico/stdlib.h"
-#include "../Macros/macros.h"
+#include "pico/stdlib.h" // IWYU pragma: keep
+#include "../Macros/macros.h" // IWYU pragma: keep
+
 
     // LORA STATES
     typedef enum {

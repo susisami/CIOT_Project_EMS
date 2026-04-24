@@ -4,6 +4,8 @@
 #include <ctype.h>
 #include "lora.h"
 #include "hardware/uart.h"
+#include "app_key.h"
+
 
 
 //Forget everything the module said
