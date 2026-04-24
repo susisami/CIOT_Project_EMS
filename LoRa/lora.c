@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include "lora.h"
 #include "hardware/uart.h"
-#include "app_key.h"
+#include "../.env/lora_app_key.h"
 
 
 
