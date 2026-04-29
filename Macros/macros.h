@@ -15,6 +15,7 @@
         #define LED_2 21
         #define LED_3 22
 
+
     // GPIO INPUTS
     #define OPTO_FORK 28
     #define ROT_SW 12
@@ -58,5 +59,14 @@
     #define LORA_MESSAGE_SIZE 128
     #define LORA_COMMAND_SIZE 192
 
+    // I2C
+    #define EEPROM_ADDR_PROGRAM_STATE 0x0000
+    #define EEPROM_ADDR_DISPENSER_POSITION 0x0002
+    #define EEPROM_ADDR_AVG_STEPS 0x0004 // 2 bytes 
+    #define EEPROM_ADDR_DISPENSER_IS_CALIBRATED 0x0008
+    #define EEPROM_ADDR_DISPENSER_ON_MOVE 0x00010
+    #define I2C_FREQ 100000
+    #define SDA_PIN 16
+    #define SCL_PIN 17
 
 #endif //MACROS_H

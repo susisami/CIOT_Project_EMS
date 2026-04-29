@@ -2,8 +2,27 @@
 #include "../Macros/macros.h" 
 #include "initialize.h"
 #include <stdio.h>
+#include "hardware/i2c.h"
+#include "pico/binary_info.h" // IWYU pragma: keep
 
 
+// EEPROM
+int init_i2c_instance(void)
+{
+    i2c_init(i2c0, I2C_FREQ);
+
+    gpio_set_function(SDA_PIN, GPIO_FUNC_I2C);
+    gpio_set_function(SCL_PIN, GPIO_FUNC_I2C);
+    gpio_pull_up(SDA_PIN);
+    gpio_pull_up(SCL_PIN);
+
+    bi_decl(bi_2pins_with_func(SDA_PIN, SCL_PIN, GPIO_FUNC_I2C));
+
+    return 0;
+}
+
+
+// SYSTEM STRUCT
 void init_sys_variables(sys_info_t *systemVariables)
 {
     systemVariables->isCalibrated = false;

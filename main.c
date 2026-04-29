@@ -15,19 +15,17 @@
     #include "Dispense/run.h"
 
 
-/* ENUMS */
-    // PROGRAM STATES
-    typedef enum { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE } program_state_t;
-
 
 /* MAIN */
 int main() {
-
-    /* SYSTEM VARIABLES */
     program_state_t program_state = PRE_CALIB;
+    sys_info_t systemVariables;
+
+    // eeprom_read_program(&systemVariables);
+    
+    /* SYSTEM VARIABLES */
     int irq_pin;
 
-    sys_info_t systemVariables;
     init_sys_variables(&systemVariables);
 
     // INIT FUNCTIONS
