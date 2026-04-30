@@ -48,7 +48,7 @@
 
 
         // VALUES TO MAIN PROGRAM
-        systemVariables->steps_per_rev = steps_per_rotation;
+        systemVariables->avg_steps = steps_per_rotation;
         systemVariables->isCalibrated = true;
     }
 

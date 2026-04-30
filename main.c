@@ -13,37 +13,43 @@
     #include "Calibration/calib.h"
     #include "Functions/functions.h" // IWYU pragma: keep
     #include "Dispense/run.h"
+    #include "Eeprom/eeprom.h"
 
 
 
 /* MAIN */
 int main() {
-    program_state_t program_state = PRE_CALIB;
-    sys_info_t systemVariables;
-
-    // eeprom_read_program(&systemVariables);
-    
     /* SYSTEM VARIABLES */
-    int irq_pin;
+    sys_info_t systemVariables;
+    payload_control_t payloadController;
 
     init_sys_variables(&systemVariables);
 
+    int irq_pin;
     // INIT FUNCTIONS
-    init_gpio_all();
     stdio_init_all();
-    
+    init_gpio_all();
+    init_i2c_instance();
+
 
     queue_init(&button_queue, sizeof(bool), QUEUE_SIZE);
     queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE);
 
+
     gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_FALL, true, &interrupt_callback);
     gpio_set_irq_enabled_with_callback(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false, &interrupt_callback);
 
+
     printf("Boot\n");
 
-    
+
     lora_module_t lora_module;
     init_lora(&lora_module);
+
+    // READ EEPROM FOR PREVIOUS SYSTEM SETTINGS
+    load_eeprom_settings(&systemVariables);
+    program_state_t program_state = systemVariables.program_state;
+
     // MAIN PROGRAM LOOP
     while (true)
     {
@@ -54,14 +60,16 @@ int main() {
 
             case PRE_CALIB: // BLINK LED UNTIL BUTTON IS PRESSED
 
-
                 if (systemVariables.button_pressed) // ROT_SW button pressed 
                 {
+                    systemVariables.program_state = CALIB;
+                    write_program_state(&systemVariables, &payloadController);
+                    program_state = systemVariables.program_state;
+
                     systemVariables.button_pressed = false;
                     gpio_put(LED_2, false);
 
-                    program_state = CALIB;
-                } 
+                }
                 else // BLINK LED
                 { 
                     systemVariables.led_on = !systemVariables.led_on; 
@@ -78,21 +86,36 @@ int main() {
 
             case CALIB: // CALIBRATE MOTOR
 
+                // CALIBRATION RUN
+                systemVariables.isRunning = true;
+                write_movement(&systemVariables, &payloadController);
                 motor_calibration(&systemVariables);
+                systemVariables.isRunning = false;
+                write_movement(&systemVariables, &payloadController);
+
+                // AFTER CALIBRATION RUN
+                systemVariables.program_state = PRE_DISPENSE;
+                write_program_state(&systemVariables, &payloadController);
+                write_avg_steps(&systemVariables, &payloadController);
+                program_state = systemVariables.program_state;
+
                 gpio_put(LED_2, 1);
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
 
-                program_state = PRE_DISPENSE;
                 break;
 
 
             case PRE_DISPENSE: // WAIT FOR A BUTTON PRESS
 
                 if (systemVariables.button_pressed) {
+
+                    systemVariables.program_state = DISPENSE;
+                    write_program_state(&systemVariables, &payloadController);
+                    program_state = systemVariables.program_state;
+
                     systemVariables.button_pressed = false;
                     gpio_put(LED_2, false);
 
-                    program_state = DISPENSE;
                 }
                 break;
 
@@ -105,7 +128,13 @@ int main() {
                         bool dispensed = false;
                         systemVariables.dispense_start_time = get_absolute_time();
                         gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
-                        run_motor(systemVariables.steps_per_rev, 1);
+
+                        // EEPROM FUNCTIONALITY
+                        systemVariables.isRunning = true;
+                        write_movement(&systemVariables, &payloadController);
+                        run_motor(systemVariables.avg_steps, 1);
+                        systemVariables.isRunning = false;
+                        write_movement(&systemVariables, &payloadController);
 
                         sleep_ms(PIEZO_TIMEOUT_MS);
 
@@ -128,14 +157,26 @@ int main() {
                         }
 
                         gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false);
+
+                        // EEPROM FUNCTIONALITY
                         systemVariables.dispenser_position++;
+                        write_dispenser_position(&systemVariables, &payloadController);
+
                         dispensed = false;
                     }
                 }
 
                 lora_send_event(&lora_module, EVENT_DISPENSER_EMPTY, NULL);
+
                 init_sys_variables(&systemVariables); // init variables for a fresh start
-                program_state = PRE_CALIB;
+
+                // EEPROM FUNCTIONALITY
+                write_program_state(&systemVariables, &payloadController);
+                write_avg_steps(&systemVariables, &payloadController);
+                write_dispenser_position(&systemVariables, &payloadController);
+
+                program_state = systemVariables.program_state;
+
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
                 break;
         }

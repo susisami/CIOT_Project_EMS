@@ -16,24 +16,26 @@
     // SYSTEM STRUCTURE
     typedef struct SystemInformation
     {
+        // EEPROM VARIABLES
+
+            // Current program state { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE }
+            program_state_t program_state;
+
+            // total steps per full cycle (approx. 4096)
+            uint avg_steps;
+
+            // Marks the current total amount of steps in the mode DISPENSE
+            uint dispenser_position;
+
+            // Shows whether the motor was running / not running
+            bool isRunning;
+
+        // Determines when the system was calibrated in the program state { CALIB }
         bool isCalibrated;
-
-
-// ARE THEY THE SAME
-        // total steps per full cycle (approx. 4096)
-        uint avg_steps;
-        // position from 0 to steps_per_rev (calibrated=0, increasing clockwise)
-        uint steps_per_rev;
-//
 
 
         // Timestamp for controlling the dispense happening at intervals.
         absolute_time_t dispense_start_time;
-
-        // Marks the current total amount of steps in the mode DISPENSE
-        uint dispenser_position;
-
-        
 
         // Amount of pills that has been dispensed
         uint dispensed_pills;
@@ -45,6 +47,20 @@
         bool led_on;
 
     } sys_info_t;
+
+
+    // EEPROM PAYLOAD STRUCTURE ( MADE FOR PROGRAM SCALABILITY )
+    typedef struct Eeprom_Payload
+    {
+        uint8_t payload_array[MAX_PAYLOAD_SIZE];
+        int payload_length;
+
+        // Data to be stored inside the payload array
+        uint8_t data_array[MAX_TTL_READS];
+        int data_length;
+
+    } payload_control_t;
+
 
 /* FUNCTION DECLARATIONS */
 
@@ -59,6 +75,5 @@
 
     // init 12c
     int init_i2c_instance(void);
-
 
 #endif //INITIALIZE_H

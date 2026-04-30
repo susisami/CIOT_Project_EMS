@@ -36,6 +36,8 @@ add_executable(${PROJECT_NAME}
         Dispense/run.h
         LoRa/lora.c
         LoRa/lora.h
+        Eeprom/eeprom.c
+        Eeprom/eeprom.h
 )
 
 # Create map/bin/hex/uf2 files
