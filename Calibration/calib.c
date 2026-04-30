@@ -47,7 +47,7 @@
         gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, false);
 
 
-        // VALUES TO MAIN PROGRAM
+        // VALUES TO MAIN PROGRAM !
         systemVariables->avg_steps = steps_per_rotation;
         systemVariables->isCalibrated = true;
     }

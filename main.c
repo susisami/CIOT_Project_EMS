@@ -170,7 +170,7 @@ int main() {
 
                 init_sys_variables(&systemVariables); // init variables for a fresh start
 
-                // EEPROM FUNCTIONALITY
+                // EEPROM FUNCTIONALITY //
                 write_program_state(&systemVariables, &payloadController);
                 write_avg_steps(&systemVariables, &payloadController);
                 write_dispenser_position(&systemVariables, &payloadController);

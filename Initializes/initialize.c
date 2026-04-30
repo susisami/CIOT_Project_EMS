@@ -6,7 +6,7 @@
 #include "pico/binary_info.h" // IWYU pragma: keep
 
 
-// EEPROM
+// EEPROM INIT
 int init_i2c_instance(void)
 {
     i2c_init(i2c0, I2C_FREQ);

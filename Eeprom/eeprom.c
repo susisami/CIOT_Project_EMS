@@ -10,7 +10,7 @@
 
     /* MAIN EEPROM READING & SAVING */
 
-        /* LOAD UP SYSTEM SETTINGS */
+        /* LOAD UP SYSTEM'S SETTINGS */
         int load_eeprom_settings(struct SystemInformation *systemVariables)
         {
             bool edgeDetected;

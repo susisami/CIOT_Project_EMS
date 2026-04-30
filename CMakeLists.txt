@@ -1,4 +1,4 @@
-# Set minimum required version of CMake
+# Set minimum required version of CMake #
 cmake_minimum_required(VERSION 3.12)
 
 # Set board type because we are building for PicoW

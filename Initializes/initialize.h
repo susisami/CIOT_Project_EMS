@@ -73,7 +73,7 @@
     // init LoRa module
     void init_lora(lora_module_t *lora_module);
 
-    // init 12c
+    // init i2c
     int init_i2c_instance(void);
 
 #endif //INITIALIZE_H

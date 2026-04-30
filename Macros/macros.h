@@ -59,7 +59,7 @@
     #define LORA_MESSAGE_SIZE 128
     #define LORA_COMMAND_SIZE 192
 
-    // I2C
+    // I2C CONSTANTS
     // ADDRESSING
         #define EEPROM_ADDR_PROGRAM_STATE 0x0000
         #define EEPROM_ADDR_AVG_STEPS 0x0002 // 2 bytes
