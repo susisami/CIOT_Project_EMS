@@ -19,19 +19,19 @@
     void motor_step(int steps[MTR_PHASE_AMOUNT][MTR_COILS], int step_nr);
     void position_correction(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int calibration_correction_steps);
     void get_avg_steps(int *opto_fork_value, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[DIVIDE_ROTATION]);
-    
 
-    
+
+
 /* FUNCTIONS */
 
-// MAIN CALIBRATION FUNCTION 
+// MAIN CALIBRATION FUNCTION
 
     void motor_calibration(sys_info_t *systemVariables)
     {
         // INTERRUPT
         queue_init(&opto_queue, sizeof(int), QUEUE_SIZE);
         gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true);
-        
+
 
         // VARIABLES
         int steps_per_rotation = 0;

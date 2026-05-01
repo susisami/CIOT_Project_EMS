@@ -304,4 +304,3 @@ const char *lora_event_to_string(lora_event_t event) {
         default: return "UNKNOWN";
     }
 }
-

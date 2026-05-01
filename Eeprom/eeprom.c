@@ -13,7 +13,7 @@
         /* LOAD UP SYSTEM'S SETTINGS */
         int load_eeprom_settings(struct SystemInformation *systemVariables)
         {
-            bool edgeDetected;
+            int edgeDetected;
 
             read_program_state(systemVariables);
 
@@ -24,12 +24,15 @@
                     // LOGIC TO GO COUNTERCLOCKWISE UNTIL RISING EDGE AND BACKUP AVG STEPS / 16
                     while (!queue_try_remove(&opto_queue, &edgeDetected))
                     {
-                        stepper_motor_run(COUNTERCLOCKWISE);
+                        stepper_motor_run(CLOCKWISE);
                     }
+
+                    printf("STEPS: %d\n", systemVariables->avg_steps);
+                    printf("STEPS: %d\n", systemVariables->avg_steps);
 
                     for (int i = 0; i < systemVariables->avg_steps / 16; i++)
                     {
-                        stepper_motor_run(CLOCKWISE);
+                        stepper_motor_run(COUNTERCLOCKWISE);
                     }
                 }
 
@@ -68,7 +71,7 @@
                     read_movement(systemVariables, data_array, memory_address);
                 }
 
-                printf("Validation error at [EEPROM: Program State]\n");
+                else { printf("Validation error at [EEPROM: Program State]\n"); }
 
                 return 0;
             }
@@ -91,14 +94,14 @@
 
                     else
                     {
-                        printf("Carousel was running, storing value [%d] to struct", data_array[0]);
+                        printf("Carousel was running, storing value [%d] to struct\n", data_array[0]);
                     }
 
                     systemVariables->isRunning = data_array[0];
                     read_avg_steps(systemVariables, data_array, memory_address);
                 }
 
-                printf("Validation error at [EEPROM: Carousel Movement Detection]\n");
+                else { printf("Validation error at [EEPROM: Carousel Movement Detection]\n"); }
 
                 return 0;
             }
@@ -119,7 +122,7 @@
                     read_dispenser_position(systemVariables, data_array, memory_address);
                 }
 
-                printf("Validation error at [EEPROM: Average Step Size]\n");
+                else { printf("Validation error at [EEPROM: Average Step Size]\n"); }
 
                 return 0;
             }
@@ -137,10 +140,7 @@
                 {
                     systemVariables->dispenser_position = data_array[0];
                 }
-                else
-                {
-                    printf("Validation error at [EEPROM: Dispenser Position]\n");
-                }
+                else { printf("Validation error at [EEPROM: Dispenser Position]\n"); }
 
                 return 0;
             }
@@ -201,9 +201,9 @@
 
                 else
                 {
+
                     printf("[ERR] Average step size save failed.\n");
                 }
-
                 return 0;
             }
 

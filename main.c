@@ -46,6 +46,7 @@ int main() {
     lora_module_t lora_module;
     init_lora(&lora_module);
 
+
     // READ EEPROM FOR PREVIOUS SYSTEM SETTINGS
     load_eeprom_settings(&systemVariables);
     program_state_t program_state = systemVariables.program_state;
