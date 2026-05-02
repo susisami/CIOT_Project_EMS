@@ -26,8 +26,8 @@ add_executable(${PROJECT_NAME}
     main.c
         Calibration/calib.c
         Calibration/calib.h
-        Functions/functions.c
-        Functions/functions.h
+        Interrupt/interrupt.c
+        Interrupt/interrupt.h
         Initializes/initialize.c
         Initializes/initialize.h
         Utilities/utils.c

@@ -11,7 +11,7 @@
     #include "Macros/macros.h"
     #include "Initializes/initialize.h"
     #include "Calibration/calib.h"
-    #include "Functions/functions.h" // IWYU pragma: keep
+    #include "Interrupt/interrupt.h"
     #include "Dispense/run.h"
     #include "Eeprom/eeprom.h"
 
@@ -32,6 +32,7 @@ int main() {
     init_i2c_instance();
 
 
+    queue_init(&opto_queue, sizeof(int), QUEUE_SIZE);
     queue_init(&button_queue, sizeof(bool), QUEUE_SIZE);
     queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE);
 

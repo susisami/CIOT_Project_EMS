@@ -1,7 +1,7 @@
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "pico/util/queue.h" // IWYU pragma: keep
 #include "../Initializes/initialize.h"
-#include "../Functions/functions.h"
+#include "../Interrupt/interrupt.h"
 #include "../Macros/macros.h"
 
 
@@ -29,7 +29,6 @@
     void motor_calibration(sys_info_t *systemVariables)
     {
         // INTERRUPT
-        queue_init(&opto_queue, sizeof(int), QUEUE_SIZE);
         gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true);
 
 

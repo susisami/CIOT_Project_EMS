@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "../Dispense/run.h"
-#include "../Functions/functions.h"
+#include "../Interrupt/interrupt.h"
 #include "../Initializes/initialize.h" // IWYU pragma: keep
 #include "eeprom.h"
 #include "hardware/i2c.h"

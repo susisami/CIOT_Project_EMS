@@ -4,18 +4,19 @@
 #include "pico/util/queue.h"
 
 
-// INTERRUPT QUEUE FOR ROT SW (GP12)
-queue_t button_queue;
+/* QUEUE DEFINITIONS */
 
-// INTERRUPT QUEUE FOR OPTO FORK (GP28)
-queue_t opto_queue;
+    // QUEUE FOR ROT SW (GP12)
+    queue_t button_queue;
 
-//INTERRUPT QUEUE FOR PIEZO SENSOR (GP27)
-queue_t pills_queue;
+    // QUEUE FOR OPTO FORK (GP28)
+    queue_t opto_queue;
+
+    // QUEUE FOR PIEZO SENSOR (GP27)
+    queue_t pills_queue;
 
 
-
-/* FUNCTIONS */
+/* FUNCTION DEFINITIONS */
 
     // IRS FOR ROT SW (GP12), OPTO FORK (GP28) & PIEZO SENSOR (GP27)
     void interrupt_callback(uint gpio, uint32_t events)
