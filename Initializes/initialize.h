@@ -25,14 +25,13 @@
             uint avg_steps;
 
             // Marks the current total amount of steps in the mode DISPENSE
-            uint dispenser_position;
+            int dispenser_position;
 
             // Shows whether the motor was running / not running
             bool isRunning;
 
         // Determines when the system was calibrated in the program state { CALIB }
         bool isCalibrated;
-
 
         // Timestamp for controlling the dispense happening at intervals.
         absolute_time_t dispense_start_time;

@@ -21,10 +21,11 @@
     // IRS FOR ROT SW (GP12), OPTO FORK (GP28) & PIEZO SENSOR (GP27)
     void interrupt_callback(uint gpio, uint32_t events)
     {
-        const bool value = true;
+        bool value = true;
 
         if (gpio == OPTO_FORK) 
         {
+            if (!gpio_get(OPTO_FORK)) {value = false;}
             queue_try_add(&opto_queue, &value);
         }
 

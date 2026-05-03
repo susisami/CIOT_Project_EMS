@@ -46,7 +46,7 @@
     #define LORA_RX_PIN 5
 
     // TIMEOUTS
-    #define LORA_JOIN_TIMEOUT_MS 5000
+    #define LORA_JOIN_TIMEOUT_MS 500
     #define LORA_MSG_SEND_TIMEOUT_MS 5000
 
     // NETWORK
@@ -65,6 +65,7 @@
         #define EEPROM_ADDR_AVG_STEPS 0x0002 // 2 bytes
         #define EEPROM_ADDR_DISPENSER_POSITION 0x0006
         #define EEPROM_ADDR_DISPENSER_ON_MOVE 0x0008
+        #define EEPROM_ADDR_STEPS_TAKEN 0x000A
 
         //
         #define EEPROM_ADDR_DISPENSER_IS_CALIBRATED 0x0010

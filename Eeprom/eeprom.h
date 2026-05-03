@@ -10,10 +10,15 @@
 
     /* MAIN EEPROM READING & WRITING FUNCTIONS */
 
-
         /* READING OPERATIONS */
             // LOAD UP SYSTEM'S SETTINGS
             int load_eeprom_settings(struct SystemInformation *systemVariables);
+
+            // RECOVER PREVIOUS DISPENSE POSITION IF wasRunning = true
+            int recover_prev_position (const struct SystemInformation *systemVariables);
+
+            // Prints the system status [state, average step count, dispenser position + whether carousel was running when shutdown]
+            int print_system_status (const struct SystemInformation *systemVariables);
 
             // SEARCH FOR PROGRAM STATE IN EEPROM
             int read_program_state (struct SystemInformation *systemVariables);
@@ -51,13 +56,11 @@
 
 
     /* UTILITY */
-
         // VALIDATE EEPROM VALUES TO BE USER INPUT
         bool validate_state(const uint8_t *array, int array_length);
 
         // FUNCTION TO TIE ALL GIVEN DATA (INVERTED & NORMAL) TOGETHER INTO A SINGLE TRANSMISSION BUFFER / PAYLOAD PACKAGE
         int package_data(const uint8_t *data_array, int data_array_length, uint8_t *payload_array, uint16_t memory_address);
-
 
 
 #endif //EEPROM_H

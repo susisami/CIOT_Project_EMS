@@ -34,7 +34,7 @@ int main() {
 
     queue_init(&opto_queue, sizeof(int), QUEUE_SIZE);
     queue_init(&button_queue, sizeof(bool), QUEUE_SIZE);
-    queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE);
+    queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE * 5);
 
 
     gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_FALL, true, &interrupt_callback);
@@ -50,6 +50,7 @@ int main() {
 
     // READ EEPROM FOR PREVIOUS SYSTEM SETTINGS
     load_eeprom_settings(&systemVariables);
+    print_system_status(&systemVariables);
     program_state_t program_state = systemVariables.program_state;
 
     // MAIN PROGRAM LOOP
@@ -101,6 +102,8 @@ int main() {
                 write_avg_steps(&systemVariables, &payloadController);
                 program_state = systemVariables.program_state;
 
+                print_system_status(&systemVariables);
+
                 gpio_put(LED_2, 1);
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
 
@@ -142,6 +145,8 @@ int main() {
 
                         while (queue_try_remove(&pills_queue, &dispensed)) systemVariables.dispensed_pills++;
 
+                        // EEPROM LOGIC FOR COUNTING THE TOTAL DISPENSED PILLS COMES HERE
+
                         if (!dispensed)
                         {
                            lora_send_event(&lora_module, EVENT_PILL_NOT_DISPENSED, NULL);
@@ -163,6 +168,7 @@ int main() {
                         // EEPROM FUNCTIONALITY
                         systemVariables.dispenser_position++;
                         write_dispenser_position(&systemVariables, &payloadController);
+                        print_system_status(&systemVariables);
 
                         dispensed = false;
                     }
@@ -176,6 +182,7 @@ int main() {
                 write_program_state(&systemVariables, &payloadController);
                 write_avg_steps(&systemVariables, &payloadController);
                 write_dispenser_position(&systemVariables, &payloadController);
+                print_system_status(&systemVariables);
 
                 program_state = systemVariables.program_state;
 
