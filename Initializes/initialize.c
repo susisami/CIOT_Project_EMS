@@ -1,5 +1,5 @@
 #include "pico/stdlib.h" // IWYU pragma: keep
-#include "../Macros/macros.h" 
+#include "../Config/config.h"
 #include "initialize.h"
 #include <stdio.h>
 #include "hardware/i2c.h"

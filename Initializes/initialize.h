@@ -2,7 +2,7 @@
 #define INITIALIZE_H
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "../LoRa/lora.h"
-
+#include "../Config/config.h"
 
 
 /* ENUMS */

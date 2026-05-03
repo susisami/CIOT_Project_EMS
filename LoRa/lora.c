@@ -4,6 +4,7 @@
 #include "lora.h"
 #include "hardware/uart.h"
 #include "../.env/lora_app_key.h"
+#include "../Config/config.h"
 
 
 //Forget everything the module said
