@@ -20,8 +20,9 @@
                 if (systemVariables->program_state != CALIB && systemVariables->isRunning)
                 {
                     recover_prev_position(systemVariables);
-                    printf("[!] System started with previous settings [!]\n");
                 }
+
+                printf("[!] System started with previous settings [!]\n");
             }
 
             else
