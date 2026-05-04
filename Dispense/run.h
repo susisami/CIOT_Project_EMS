@@ -1,7 +1,8 @@
-#ifndef BLINK_RUN_H
-#define BLINK_RUN_H
+#ifndef RUN_H
+#define RUN_H
+
 /* LIBRARIES */
-#include "pico/util/queue.h" // IWYU pragma: keep
+    #include "pico/util/queue.h" // IWYU pragma: keep
 
 
 /* ENUMS */
@@ -17,4 +18,4 @@
     int stepper_motor_run(uint direction);
 
 
-#endif //BLINK_RUN_H
+#endif //RUN_H

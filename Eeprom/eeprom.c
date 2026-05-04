@@ -23,14 +23,17 @@
                 }
 
                 printf("[!] System started with previous settings [!]\n");
+
+                return 1;
             }
 
             else
             {
                 printf("[!] System started with default settings [!]\n");
+
+                return 0;
             }
 
-            return 0;
         }
 
         // RECOVER PREVIOUS DISPENSE POSITION IF wasRunning = true
@@ -225,8 +228,10 @@
         }
 
         // Saves the state of movement during the CALIB or DISPENSE state { 0 = wasn't moving, 1 = was moving }
-        int write_movement (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        int write_movement_state (struct SystemInformation *systemVariables, struct Eeprom_Payload *payload, bool isRunning)
         {
+            systemVariables->isRunning = isRunning;
+            
             payload->payload_length = 4;
             payload->data_length = 2;
 

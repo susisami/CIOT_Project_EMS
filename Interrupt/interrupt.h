@@ -1,7 +1,8 @@
-#ifndef CALLBACK_H
-#define CALLBACK_H
+#ifndef INTERRRUPT_H
+#define INTERRRUPT_H
+
 /*  LIBRARIES */
-#include "pico/util/queue.h"
+    #include "pico/util/queue.h"
 
 
 /* QUEUE DECLARATIONS */
@@ -22,4 +23,4 @@
     void interrupt_callback(uint gpio, uint32_t events);
 
 
-#endif //CALLBACK_H
+#endif //INTERRRUPT_H

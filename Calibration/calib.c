@@ -15,10 +15,10 @@
 
     
 /* FUNCTION PROTOTYPES */
-    void calibrate(int *steps_per_rotation, int *opto_fork_value, int steps[MTR_PHASE_AMOUNT][MTR_COILS]);
+    void calibrate(int *steps_per_rotation, bool *opto_fork_edge, int steps[MTR_PHASE_AMOUNT][MTR_COILS]);
     void motor_step(int steps[MTR_PHASE_AMOUNT][MTR_COILS], int step_nr);
     void position_correction(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int calibration_correction_steps);
-    void get_avg_steps(int *opto_fork_value, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[DIVIDE_ROTATION]);
+    void get_avg_steps(bool *opto_fork_edge, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[DIVIDE_ROTATION]);
 
 
 
@@ -34,12 +34,12 @@
 
         // VARIABLES
         int steps_per_rotation = 0;
-        int opto_fork_value = 0;
+        bool opto_fork_edge = false;
         int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS] = { {1,0,0,0}, {1,1,0,0}, {0,1,0,0}, {0,1,1,0}, {0,0,1,0}, {0,0,1,1}, {0,0,0,1}, {1,0,0,1} };
         
 
         // CALIBRATE MOTOR
-        calibrate(&steps_per_rotation, &opto_fork_value, mtr_steps_arr);
+        calibrate(&steps_per_rotation, &opto_fork_edge, mtr_steps_arr);
 
         
         // DISABLE INTERRUPT
@@ -53,7 +53,7 @@
 
 
 // GET AVERAGE AMOUNT OF STEPS PER ROTATION
-    void get_avg_steps(int *opto_fork_value, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[DIVIDE_ROTATION])
+    void get_avg_steps(bool *opto_fork_edge, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[DIVIDE_ROTATION])
     {
         /*
             Divide full rotation into two segments/variables:
@@ -74,53 +74,68 @@
         int counter = CALIBRATION_ROTATIONS; 
         calib_state_t state = WAIT_FIRST_EDGE;
 
+
         while (state != CALIBRATED)
         {    
+
             for (int step_nr = 0; step_nr < MTR_PHASE_AMOUNT; step_nr++)
             {
                 motor_step(mtr_steps_arr, step_nr);
 
-                // check opto fork queue after each motor step
-                if (queue_try_remove(&opto_queue, &opto_fork_value)) 
-                {
-                    switch (state) {
+                bool change_state = queue_try_remove(&opto_queue, &opto_fork_edge);
 
+
+                // STATE MACHINE
+                switch (state) {
+
+                    // ROTATE UNTIL THE FIRST EDGE
                     case WAIT_FIRST_EDGE:
-                        state = COUNT_FIRST;
-                        break;
-                    
-
-                    case COUNT_FIRST:
-                        state = COUNT_SECOND;
-                        break;
-
-                        
-                    case COUNT_SECOND:
-                        counter--;
-                        if (counter > 0)
+                        if (change_state) 
                         {
                             state = COUNT_FIRST;
                         }
+
+                        break;
+                    
+                    // Count until the next edge (first section between opto edges)
+                    case COUNT_FIRST:
+                        if (change_state)
+                        {
+                            state = COUNT_SECOND;
+                        }
                         else
                         {
-                            state = CALIBRATED;
+                            count_first++;
+                            state = COUNT_FIRST;
                         }
                         break;
-                        
-                        
-                    case CALIBRATED:
-                      break;
-                    }
-                }
 
-                // count the steps between   1st and 2nd   &&   2nd and 3rd   OPTO EDGE
-                if (state == COUNT_FIRST)
-                {
-                    count_first++;
-                }
-                else if (state == COUNT_SECOND)
-                {
-                    count_second++;
+                    // Count until the next edge (second section between opto edges) 
+                    //      and return to COUNT_FIRST until counter==0 (= CALIBRATED) 
+                    case COUNT_SECOND:
+                        if (change_state)
+                        {
+                            counter--; // counter amount of rotations for avg steps
+                            if (counter > 0)
+                            {
+                                state = COUNT_FIRST;
+                            }
+                            else
+                            {
+                                state = CALIBRATED;
+                            }
+                        }
+                        else
+                        {
+                            count_second++;
+                            state = COUNT_SECOND;
+                        }
+                        
+                        break;
+                    
+                    
+                    case CALIBRATED:
+                        break;
                 }
 
                 sleep_us(MTR_SLEEP_US);
@@ -132,7 +147,7 @@
 
 
 // CALIBRATE THE MOTOR
-    void calibrate(int *steps_per_rotation, int *opto_fork_value, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS])
+    void calibrate(int *steps_per_rotation, bool *opto_fork_edge, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS])
     {
         /*
             1.  run get_avg_steps()
@@ -152,7 +167,7 @@
         gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true);
 
         // GET AVERAGE STEPS
-        get_avg_steps(opto_fork_value, mtr_steps_arr, results);
+        get_avg_steps(opto_fork_edge, mtr_steps_arr, results);
 
         count_first_avg = results[0];
         count_second_avg = results[1];

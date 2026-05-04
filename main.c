@@ -25,14 +25,13 @@ int main() {
 
     init_sys_variables(&systemVariables);
 
-    int irq_pin;
     // INIT FUNCTIONS
     stdio_init_all();
     init_gpio_all();
     init_i2c_instance();
 
 
-    queue_init(&opto_queue, sizeof(int), QUEUE_SIZE);
+    queue_init(&opto_queue, sizeof(bool), QUEUE_SIZE);
     queue_init(&button_queue, sizeof(bool), QUEUE_SIZE);
     queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE * 5);
 
@@ -51,6 +50,8 @@ int main() {
     // READ EEPROM FOR PREVIOUS SYSTEM SETTINGS
     load_eeprom_settings(&systemVariables);
     print_system_status(&systemVariables);
+
+    // ####### SHOULD THIS BE REMOVED ? #########
     program_state_t program_state = systemVariables.program_state;
 
     // MAIN PROGRAM LOOP
@@ -64,14 +65,13 @@ int main() {
             case PRE_CALIB: // BLINK LED UNTIL BUTTON IS PRESSED
 
                 if (systemVariables.button_pressed) // ROT_SW button pressed 
-                {
+                {                    
+                    systemVariables.button_pressed = false;
+                    gpio_put(LED_2, false);
+                    
                     systemVariables.program_state = CALIB;
                     write_program_state(&systemVariables, &payloadController);
                     program_state = systemVariables.program_state;
-
-                    systemVariables.button_pressed = false;
-                    gpio_put(LED_2, false);
-
                 }
                 else // BLINK LED
                 { 
@@ -79,10 +79,12 @@ int main() {
                     gpio_put(LED_2, systemVariables.led_on);
 
                     // sleep LED_BLINK_MS, stop sleeping if queue is not empty (== button has been pressed)
-                    for (int i = 0; i < LED_BLINK_SLOW_MS && !queue_try_peek(&button_queue, &irq_pin); i++)
+                    for (int i = 0; i < LED_BLINK_SLOW_MS && !queue_try_peek(&button_queue, NULL); i++)
                     {
                         sleep_ms(1); 
                     }
+
+                    systemVariables.program_state = PRE_CALIB;
                 }
                 break;
 
@@ -90,11 +92,9 @@ int main() {
             case CALIB: // CALIBRATE MOTOR
 
                 // CALIBRATION RUN
-                systemVariables.isRunning = true;
-                write_movement(&systemVariables, &payloadController);
+                write_movement_state(&systemVariables, &payloadController, true);
                 motor_calibration(&systemVariables);
-                systemVariables.isRunning = false;
-                write_movement(&systemVariables, &payloadController);
+                write_movement_state(&systemVariables, &payloadController, false);
 
                 // AFTER CALIBRATION RUN
                 systemVariables.program_state = PRE_DISPENSE;
@@ -135,11 +135,9 @@ int main() {
                         gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
 
                         // EEPROM FUNCTIONALITY
-                        systemVariables.isRunning = true;
-                        write_movement(&systemVariables, &payloadController);
+                        write_movement_state(&systemVariables, &payloadController, true);
                         run_motor(systemVariables.avg_steps, 1);
-                        systemVariables.isRunning = false;
-                        write_movement(&systemVariables, &payloadController);
+                        write_movement_state(&systemVariables, &payloadController, false);
 
                         sleep_ms(PIEZO_TIMEOUT_MS);
 

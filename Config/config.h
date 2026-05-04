@@ -1,5 +1,5 @@
-#ifndef MACROS_H
-#define MACROS_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
 /* CONSTANTS */
 
@@ -80,4 +80,4 @@
     #define SDA_PIN 16
     #define SCL_PIN 17
 
-#endif //MACROS_H
+#endif //CONFIG_H

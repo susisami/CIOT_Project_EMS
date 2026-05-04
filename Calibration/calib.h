@@ -1,8 +1,11 @@
-#ifndef CALIBRATION_H
-#define CALIBRATION_H
+#ifndef CALIB_H
+#define CALIB_H
 
-#include "../Initializes/initialize.h"
+/* LIBRARIES */
+    #include "../Initializes/initialize.h"
 
-void motor_calibration(sys_info_t *systemVariables);
+    
+/* FUNCTION DECLARATIONS */
+    void motor_calibration(sys_info_t *systemVariables);
 
-#endif //CALIBRATION_H
+#endif //CALIB_H

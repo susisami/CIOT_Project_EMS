@@ -1,8 +1,12 @@
 #ifndef LORA_H
 #define LORA_H
 
-#include <stdbool.h>
-#include "pico/stdlib.h" // IWYU pragma: keep
+/* LIBRARIES */
+    #include <stdbool.h>
+    #include "pico/stdlib.h" // IWYU pragma: keep
+
+
+/* ENUMS */
 
     // LORA STATES
     typedef enum {
@@ -23,6 +27,7 @@
         EVENT_POWER_LOSS
     } lora_event_t;
 
+    
 /* STRUCTURES */
 
     // LORA MODULE STRUCTURE

@@ -1,5 +1,10 @@
 #ifndef UTILS_H
 #define UTILS_H
+
+/*  LIBRARIES */
+    #include <stdbool.h>
+
+
 /* UTILITY FUNCTIONS */
 
     // STRING + STDIN CHECKS

@@ -1,8 +1,7 @@
 #ifndef EEPROM_H
 #define EEPROM_H
-/* LIBRARIES */
 
-    // CUSTOM HEADERS
+/* LIBRARIES */
     #include "../Initializes/initialize.h"
 
 
@@ -44,7 +43,7 @@
             int write_dispenser_position (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
 
             // Saves the state of movement during the CALIB or DISPENSE state { 0 = wasn't moving, 1 = was moving }
-            int write_movement (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
+            int write_movement_state (struct SystemInformation *systemVariables, struct Eeprom_Payload *payload, bool isRunning);
 
 
         /* GENERAL READING & SAVING FUNCTIONS */

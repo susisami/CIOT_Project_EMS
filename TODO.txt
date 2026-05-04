@@ -1,0 +1,26 @@
+
+# bugs: 
+    1. Reboot while state==DISPENSE && isRunning==false:
+        - After boot dispensing continues a step too far 
+          (back to the calibrated position)
+            - This doesn't happen if the reboot occurs while isRunning==true;
+
+    2. Status prints are late sometimes, are the writes to eeprom as well?
+        - [STATE] = 0 during calibration
+        - [STATE] = 2 until first pill is dispensed and we start moving towards the second [DISP-POS] 
+        - [DISP-POS] updates to current when it begins moving to the next one
+
+    3. 
+
+
+# other fixes: 
+    1. main() has two program_state structs it keeps updated
+
+    2. 
+
+
+# additional features: 
+    1. Show dispenser position (0-7) on leds?
+
+    2. 
+
