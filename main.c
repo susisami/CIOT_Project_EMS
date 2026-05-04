@@ -12,7 +12,7 @@
     #include "Initializes/initialize.h"
     #include "Calibration/calib.h"
     #include "Interrupt/interrupt.h"
-    #include "Dispense/run.h"
+    #include "Dispense/dispense.h"
     #include "Eeprom/eeprom.h"
 
 
@@ -20,47 +20,48 @@
 /* MAIN */
 int main() {
     /* SYSTEM VARIABLES */
-    sys_info_t systemVariables;
     payload_control_t payloadController;
 
-    init_sys_variables(&systemVariables);
-
+    sys_info_t systemVariables;
+    
+    lora_module_t lora_module;
+    
+    
     // INIT FUNCTIONS
     stdio_init_all();
     init_gpio_all();
     init_i2c_instance();
 
+    init_sys_variables(&systemVariables);
+    init_lora(&lora_module);
 
     queue_init(&opto_queue, sizeof(bool), QUEUE_SIZE);
     queue_init(&button_queue, sizeof(bool), QUEUE_SIZE);
     queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE * 5);
 
 
+    // CALLBACKS
     gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_FALL, true, &interrupt_callback);
     gpio_set_irq_enabled_with_callback(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false, &interrupt_callback);
 
-
     printf("Boot\n");
-
-
-    lora_module_t lora_module;
-    init_lora(&lora_module);
 
 
     // READ EEPROM FOR PREVIOUS SYSTEM SETTINGS
     load_eeprom_settings(&systemVariables);
     print_system_status(&systemVariables);
 
-    // ####### SHOULD THIS BE REMOVED ? #########
-    program_state_t program_state = systemVariables.program_state;
+    // ####### WORKS WITHOUT, IS IT NEEDED? #########
+    //program_state_t program_state = systemVariables.program_state;
 
     // MAIN PROGRAM LOOP
     while (true)
     {
         // read queue
-        queue_try_remove(&button_queue, &systemVariables.button_pressed);
+        //queue_try_remove(&button_queue, &systemVariables.button_pressed);
 
-        switch (program_state) {
+        switch (systemVariables.program_state) 
+        {
 
             case PRE_CALIB: // BLINK LED UNTIL BUTTON IS PRESSED
 
@@ -71,12 +72,11 @@ int main() {
                     
                     systemVariables.program_state = CALIB;
                     write_program_state(&systemVariables, &payloadController);
-                    program_state = systemVariables.program_state;
+                    //program_state = systemVariables.program_state;
                 }
                 else // BLINK LED
                 { 
-                    systemVariables.led_on = !systemVariables.led_on; 
-                    gpio_put(LED_2, systemVariables.led_on);
+                    gpio_put(LED_2, !gpio_get(LED_2));
 
                     // sleep LED_BLINK_MS, stop sleeping if queue is not empty (== button has been pressed)
                     for (int i = 0; i < LED_BLINK_SLOW_MS && !queue_try_peek(&button_queue, NULL); i++)
@@ -100,77 +100,38 @@ int main() {
                 systemVariables.program_state = PRE_DISPENSE;
                 write_program_state(&systemVariables, &payloadController);
                 write_avg_steps(&systemVariables, &payloadController);
-                program_state = systemVariables.program_state;
+                //program_state = systemVariables.program_state;
 
                 print_system_status(&systemVariables);
 
-                gpio_put(LED_2, 1);
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
-
+                
                 break;
-
-
+                
+                
             case PRE_DISPENSE: // WAIT FOR A BUTTON PRESS
-
-                if (systemVariables.button_pressed) {
-
+            
+                if (systemVariables.button_pressed) 
+                {    
                     systemVariables.program_state = DISPENSE;
                     write_program_state(&systemVariables, &payloadController);
-                    program_state = systemVariables.program_state;
-
-                    systemVariables.button_pressed = false;
+                    //program_state = systemVariables.program_state;
+                    
                     gpio_put(LED_2, false);
-
+                    systemVariables.button_pressed = false;
                 }
+                else 
+                {
+                    gpio_put(LED_2, true);
+                    systemVariables.program_state = PRE_DISPENSE;
+                }
+
                 break;
 
 
             case DISPENSE: // DISPENSE PILLS
 
-                while (systemVariables.dispenser_position < DISPENSE_ROUNDS) {
-                    if (absolute_time_diff_us(systemVariables.dispense_start_time, get_absolute_time()) >= DISPENSE_TIMEOUT_MS * 1000)
-                    {
-                        bool dispensed = false;
-                        systemVariables.dispense_start_time = get_absolute_time();
-                        gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
-
-                        // EEPROM FUNCTIONALITY
-                        write_movement_state(&systemVariables, &payloadController, true);
-                        run_motor(systemVariables.avg_steps, 1);
-                        write_movement_state(&systemVariables, &payloadController, false);
-
-                        sleep_ms(PIEZO_TIMEOUT_MS);
-
-                        while (queue_try_remove(&pills_queue, &dispensed)) systemVariables.dispensed_pills++;
-
-                        // EEPROM LOGIC FOR COUNTING THE TOTAL DISPENSED PILLS COMES HERE
-
-                        if (!dispensed)
-                        {
-                           lora_send_event(&lora_module, EVENT_PILL_NOT_DISPENSED, NULL);
-                           for (int i = 0; i < 5; i++)
-                           {
-                                gpio_put(LED_2, 1);
-                                sleep_ms(LED_BLINK_FAST_MS);
-                                gpio_put(LED_2, 0);
-                                sleep_ms(LED_BLINK_FAST_MS);
-                           }
-                        }
-                        else
-                        {
-                           lora_send_event(&lora_module, EVENT_PILL_DISPENSED, NULL);
-                        }
-
-                        gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false);
-
-                        // EEPROM FUNCTIONALITY
-                        systemVariables.dispenser_position++;
-                        write_dispenser_position(&systemVariables, &payloadController);
-                        print_system_status(&systemVariables);
-
-                        dispensed = false;
-                    }
-                }
+                dispense(&systemVariables, &payloadController, &lora_module);
 
                 lora_send_event(&lora_module, EVENT_DISPENSER_EMPTY, NULL);
 
@@ -182,10 +143,12 @@ int main() {
                 write_dispenser_position(&systemVariables, &payloadController);
                 print_system_status(&systemVariables);
 
-                program_state = systemVariables.program_state;
+                //program_state = systemVariables.program_state;
 
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
                 break;
         }
+
+        queue_try_remove(&button_queue, &systemVariables.button_pressed);
     }
 }

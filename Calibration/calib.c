@@ -71,7 +71,7 @@
 
         int count_first = 0; // steps between   1st and 2nd   opto edge
         int count_second = 0; // steps between   2nd and 3rd   opto edge
-        int counter = CALIBRATION_ROTATIONS; 
+        int counter = CALIBRATION_ROTATION_TIMES; 
         calib_state_t state = WAIT_FIRST_EDGE;
 
 
@@ -141,8 +141,8 @@
                 sleep_us(MTR_SLEEP_US);
             }
         }
-        results[0] = (float)count_first / CALIBRATION_ROTATIONS;
-        results[1] = (float)count_second / CALIBRATION_ROTATIONS;
+        results[0] = (float)count_first / CALIBRATION_ROTATION_TIMES;
+        results[1] = (float)count_second / CALIBRATION_ROTATION_TIMES;
     }
 
 

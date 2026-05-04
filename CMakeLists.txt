@@ -34,6 +34,8 @@ add_executable(${PROJECT_NAME}
         Utilities/utils.h
         Dispense/run.c
         Dispense/run.h
+        Dispense/dispense.c
+        Dispense/dispense.h
         LoRa/lora.c
         LoRa/lora.h
         Eeprom/eeprom.c

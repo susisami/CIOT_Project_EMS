@@ -15,7 +15,6 @@
         #define LED_2 21
         #define LED_3 22
 
-
     // GPIO INPUTS
     #define OPTO_FORK 28
     #define ROT_SW 12
@@ -27,7 +26,14 @@
     #define MTR_SLEEP_US 1100 // sleep between each motor step
     #define DISPENSE_TIMEOUT_MS 1000 // 30 000 ms
     #define PIEZO_TIMEOUT_MS 90 // t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
+    #define LORA_JOIN_TIMEOUT_MS 500
+    #define LORA_MSG_SEND_TIMEOUT_MS 5000
 
+    // TIMES
+    #define CALIBRATION_ROTATION_TIMES 2 // how many rotations to count the average steps from
+    #define NO_PILL_BLINK_TIMES 5
+    
+    
     // INTERRUPTS
     #define QUEUE_SIZE 10
 
@@ -37,17 +43,12 @@
     #define DISPENSE_ROUNDS 7
     #define DIVIDE_ROTATION 2 // the whole rotation divided by the two opto edges into two sections
     #define DISPENSER_WHEEL_DIVISOR 8 // dispenser wheel slots
-    #define CALIBRATION_ROTATIONS 2 // how many rotations to count the average steps from
 
     // LORA HARDWARE
     #define LORA_UART_ID uart1
     #define LORA_BAUD_RATE 9600
     #define LORA_TX_PIN 4
     #define LORA_RX_PIN 5
-
-    // TIMEOUTS
-    #define LORA_JOIN_TIMEOUT_MS 500
-    #define LORA_MSG_SEND_TIMEOUT_MS 5000
 
     // NETWORK
     #define LORA_MAX_RETRY_ATTEMPTS 5
