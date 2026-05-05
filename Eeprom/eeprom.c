@@ -10,7 +10,7 @@
 
     /* MAIN EEPROM READING & SAVING */
 
-        /* LOAD UP SYSTEM'S SETTINGS */
+        /* LOAD UP SYSTEM SETTINGS */
         int load_eeprom_settings(struct SystemInformation *systemVariables)
         {
             read_program_state(systemVariables);
@@ -23,17 +23,14 @@
                 }
 
                 printf("[!] System started with previous settings [!]\n");
-
-                return 1;
             }
 
             else
             {
                 printf("[!] System started with default settings [!]\n");
-
-                return 0;
             }
 
+            return 0;
         }
 
         // RECOVER PREVIOUS DISPENSE POSITION IF wasRunning = true
@@ -68,6 +65,7 @@
             printf ("[STATE]: %d\n", systemVariables->program_state);
             printf ("[AVG-STEPS]: %d\n", systemVariables->avg_steps);
             printf ("[DISP-POS]: %d\n", systemVariables->dispenser_position);
+            printf("[DISP-PILLS]: %d\n", systemVariables->dispensed_pills);
             printf ("[MOVEMENT]: %d\n", systemVariables->isRunning);
 
             return 0;
@@ -228,14 +226,12 @@
         }
 
         // Saves the state of movement during the CALIB or DISPENSE state { 0 = wasn't moving, 1 = was moving }
-        int write_movement_state (struct SystemInformation *systemVariables, struct Eeprom_Payload *payload, bool isRunning)
+        int write_movement_state (struct Eeprom_Payload *payload, const bool isRunning)
         {
-            systemVariables->isRunning = isRunning;
-            
             payload->payload_length = 4;
             payload->data_length = 2;
 
-            payload->data_array[0] = systemVariables->isRunning;
+            payload->data_array[0] = isRunning;
             payload->data_array[1] = ~payload->data_array[0];
 
             package_data(payload->data_array, payload->data_length, payload->payload_array, EEPROM_ADDR_DISPENSER_ON_MOVE);

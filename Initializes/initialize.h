@@ -18,8 +18,7 @@
     // SYSTEM STRUCTURE
     typedef struct SystemInformation
     {
-        // EEPROM VARIABLES
-
+        /* EEPROM VARIABLES */
             // Current program state { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE }
             program_state_t program_state;
 
@@ -32,6 +31,7 @@
             // Shows whether the motor was running / not running
             bool isRunning;
 
+
         // Determines when the system was calibrated in the program state { CALIB }
         bool isCalibrated;
 
@@ -41,11 +41,8 @@
         // Amount of pills that has been dispensed
         uint dispensed_pills;
 
-        // 
+        // Determines whether the Rotary Encoder SW (GP12) has been pressed.
         bool button_pressed;
-
-        // 
-        bool led_on;
 
     } sys_info_t;
 

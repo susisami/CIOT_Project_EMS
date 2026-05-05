@@ -15,7 +15,6 @@
     // QUEUE FOR PIEZO SENSOR (GP27)
     queue_t pills_queue;
 
-
 /* FUNCTION DEFINITIONS */
 
     // IRS FOR ROT SW (GP12), OPTO FORK (GP28) & PIEZO SENSOR (GP27)
@@ -37,6 +36,14 @@
 
         else if (gpio == PIEZO_SR)
         {
-            queue_try_add(&pills_queue, &value);
+            const absolute_time_t pill_drop = get_absolute_time();
+
+            static absolute_time_t previous_pill_drop;
+
+            if (absolute_time_diff_us(previous_pill_drop, pill_drop) > 50 * 1000) // works with two pills & almost consistently with 3
+            {
+                previous_pill_drop = pill_drop;
+                queue_try_add(&pills_queue, &value);
+            }
         }
     }

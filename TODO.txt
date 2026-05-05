@@ -13,7 +13,7 @@
 
 
 # other fixes: 
-    1. main() has two program_state structs it keeps updated (works with the other being commented out)
+    1.
 
     2. 
 

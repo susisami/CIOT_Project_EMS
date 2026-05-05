@@ -34,7 +34,6 @@ void init_sys_variables(sys_info_t *systemVariables)
     systemVariables->dispense_start_time = 0;
     systemVariables->dispensed_pills = 0;
     systemVariables->button_pressed = false;
-    systemVariables->led_on = false;
 }
 
 // Init LoRa module

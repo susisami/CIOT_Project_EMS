@@ -1,13 +1,18 @@
-#include "../Config/config.h"
-#include "../Interrupt/interrupt.h"
-#include "../Initializes/initialize.h"
-#include "../Eeprom/eeprom.h"
-#include "../LoRa/lora.h"
-#include "run.h"
+/* LIBRARIES */
+    // STD LIBRARIES
+    #include <stdio.h>
+
+    // CUSTOM HEADERS
+    #include "../Config/config.h"
+    #include "../Interrupt/interrupt.h"
+    #include "../Initializes/initialize.h"
+    #include "../Eeprom/eeprom.h"
+    #include "../LoRa/lora.h"
+    #include "run.h"
 
 
 
-
+/* FUNCTIONS */
 void dispense(sys_info_t *systemVariables, payload_control_t *payloadController, lora_module_t *lora_module)
 {
     while (systemVariables->dispenser_position < DISPENSE_ROUNDS) 
@@ -17,18 +22,25 @@ void dispense(sys_info_t *systemVariables, payload_control_t *payloadController,
         {
             bool dispensed = false;
             systemVariables->dispense_start_time = get_absolute_time();
+
             gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
 
-            // EEPROM FUNCTIONALITY
-            write_movement_state(systemVariables, payloadController, true);
+            // EEPROM FUNCTIONALITY-
+            write_movement_state(payloadController, true);
             run_motor(systemVariables->avg_steps, 1);
-            write_movement_state(systemVariables, payloadController, false);
+            write_movement_state(payloadController, false);
+
+            systemVariables->dispenser_position++;
+            write_dispenser_position(systemVariables, payloadController);
 
             sleep_ms(PIEZO_TIMEOUT_MS);
 
-            while (queue_try_remove(&pills_queue, &dispensed)) systemVariables->dispensed_pills++;
+            gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false);
+
+            while (queue_try_remove(&pills_queue, &dispensed)) { systemVariables->dispensed_pills++; }
 
             // EEPROM LOGIC FOR COUNTING THE TOTAL DISPENSED PILLS COMES HERE
+            print_system_status(systemVariables);
 
             if (!dispensed)
             {
@@ -43,13 +55,6 @@ void dispense(sys_info_t *systemVariables, payload_control_t *payloadController,
             {
                 lora_send_event(lora_module, EVENT_PILL_DISPENSED, NULL);
             }
-
-            gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false);
-
-            // EEPROM FUNCTIONALITY
-            systemVariables->dispenser_position++;
-            write_dispenser_position(systemVariables, payloadController);
-            print_system_status(systemVariables);
 
             dispensed = false;
         }

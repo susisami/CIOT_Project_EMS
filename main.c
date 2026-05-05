@@ -19,51 +19,51 @@
 
 /* MAIN */
 int main() {
-    /* SYSTEM VARIABLES */
-    payload_control_t payloadController;
+    /* SYSTEM STRUCTURES */
+        // System Information:
+        sys_info_t systemVariables;
 
-    sys_info_t systemVariables;
+        // Eeprom data to send:
+        payload_control_t payloadController;
+
+        // LoRaWan handling:
+        lora_module_t lora_module;
     
-    lora_module_t lora_module;
     
-    
-    // INIT FUNCTIONS
+    /* INITIALIZE FUNCTIONS */
     stdio_init_all();
     init_gpio_all();
     init_i2c_instance();
-
     init_sys_variables(&systemVariables);
     init_lora(&lora_module);
 
-    queue_init(&opto_queue, sizeof(bool), QUEUE_SIZE);
-    queue_init(&button_queue, sizeof(bool), QUEUE_SIZE);
-    queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE * 5);
+
+    /* QUEUE INITIALIZES */
+        // OPTO FORK (GP28)
+        queue_init(&opto_queue, sizeof(bool), QUEUE_SIZE);
+
+        //ROTARY ENCODER SW QUEUE (GP12)
+        queue_init(&button_queue, sizeof(bool), QUEUE_SIZE);
+
+        // PIEZO SENSOR (GP27)
+        queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE);
 
 
-    // CALLBACKS
+    /* ISR ENABLES */
     gpio_set_irq_enabled_with_callback(ROT_SW, GPIO_IRQ_EDGE_FALL, true, &interrupt_callback);
     gpio_set_irq_enabled_with_callback(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false, &interrupt_callback);
 
-    printf("Boot\n");
 
-
-    // READ EEPROM FOR PREVIOUS SYSTEM SETTINGS
+    /* READ PREVIOUS SETTINGS & START SYSTEM CONTROL PROGRAM */
     load_eeprom_settings(&systemVariables);
     print_system_status(&systemVariables);
 
-    // ####### WORKS WITHOUT, IS IT NEEDED? #########
-    //program_state_t program_state = systemVariables.program_state;
 
-    // MAIN PROGRAM LOOP
     while (true)
     {
-        // read queue
-        //queue_try_remove(&button_queue, &systemVariables.button_pressed);
-
         switch (systemVariables.program_state) 
         {
-
-            case PRE_CALIB: // BLINK LED UNTIL BUTTON IS PRESSED
+            case PRE_CALIB: // BLINK LED UNTIL BUTTON IS PRESSED //
 
                 if (systemVariables.button_pressed) // ROT_SW button pressed 
                 {                    
@@ -72,7 +72,7 @@ int main() {
                     
                     systemVariables.program_state = CALIB;
                     write_program_state(&systemVariables, &payloadController);
-                    //program_state = systemVariables.program_state;
+
                 }
                 else // BLINK LED
                 { 
@@ -89,18 +89,17 @@ int main() {
                 break;
 
 
-            case CALIB: // CALIBRATE MOTOR
+            case CALIB: // CALIBRATE MOTOR //
 
                 // CALIBRATION RUN
-                write_movement_state(&systemVariables, &payloadController, true);
+                write_movement_state(&payloadController, true);
                 motor_calibration(&systemVariables);
-                write_movement_state(&systemVariables, &payloadController, false);
+                write_movement_state(&payloadController, false);
 
                 // AFTER CALIBRATION RUN
                 systemVariables.program_state = PRE_DISPENSE;
                 write_program_state(&systemVariables, &payloadController);
                 write_avg_steps(&systemVariables, &payloadController);
-                //program_state = systemVariables.program_state;
 
                 print_system_status(&systemVariables);
 
@@ -109,13 +108,12 @@ int main() {
                 break;
                 
                 
-            case PRE_DISPENSE: // WAIT FOR A BUTTON PRESS
+            case PRE_DISPENSE: // WAIT FOR A BUTTON PRESS //
             
                 if (systemVariables.button_pressed) 
                 {    
                     systemVariables.program_state = DISPENSE;
                     write_program_state(&systemVariables, &payloadController);
-                    //program_state = systemVariables.program_state;
                     
                     gpio_put(LED_2, false);
                     systemVariables.button_pressed = false;
@@ -125,11 +123,10 @@ int main() {
                     gpio_put(LED_2, true);
                     systemVariables.program_state = PRE_DISPENSE;
                 }
-
                 break;
 
 
-            case DISPENSE: // DISPENSE PILLS
+            case DISPENSE: // DISPENSE PILLS //
 
                 dispense(&systemVariables, &payloadController, &lora_module);
 
@@ -137,13 +134,11 @@ int main() {
 
                 init_sys_variables(&systemVariables); // init variables for a fresh start
 
-                // EEPROM FUNCTIONALITY //
+                /* EEPROM FUNCTIONALITY */
                 write_program_state(&systemVariables, &payloadController);
                 write_avg_steps(&systemVariables, &payloadController);
                 write_dispenser_position(&systemVariables, &payloadController);
                 print_system_status(&systemVariables);
-
-                //program_state = systemVariables.program_state;
 
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
                 break;
