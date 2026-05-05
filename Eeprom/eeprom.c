@@ -71,6 +71,19 @@
             return 0;
         }
 
+        // Reset eeprom system variables
+        int reset_system_variables(const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        {
+            write_program_state(systemVariables, payload);
+            write_avg_steps(systemVariables, payload);
+            write_dispenser_position(systemVariables, payload);
+            write_dispensed_pills(systemVariables, payload);
+            write_movement_state(payload, false);
+
+            return 0;
+        }
+
+
         /* READING OPERATIONS */
 
         int read_program_state (struct SystemInformation *systemVariables)
@@ -146,8 +159,27 @@
             if (validate_state(data_array, MAX_TTL_READS / 2))
             {
                 systemVariables->dispenser_position = data_array[0];
+                read_dispensed_pills(systemVariables, data_array, memory_address);
             }
             else { printf("Validation error at [EEPROM: Dispenser Position]\n"); }
+
+            return 0;
+        }
+
+        // Reads the amount of pills that was dispensed in the previous runs in total
+        int read_dispensed_pills (struct SystemInformation *systemVariables, uint8_t *data_array, uint8_t *memory_address)
+        {
+            memory_address[0] = EEPROM_ADDR_DISPENSED_PILLS >> 8 & 0xFF;
+            memory_address[1] = EEPROM_ADDR_DISPENSED_PILLS & 0xFF;
+
+            read_data(data_array, MAX_TTL_READS / 2, memory_address);
+            // printf("Dispensed Pills [S5]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
+
+            if (validate_state(data_array, MAX_TTL_READS / 2))
+            {
+                systemVariables->dispensed_pills= data_array[0];
+            }
+            else { printf("Validation error at [EEPROM: Dispensed Pills]\n"); }
 
             return 0;
         }
@@ -225,6 +257,28 @@
             return 0;
         }
 
+        // Saves the amount of pills that was dispensed in a run
+        int write_dispensed_pills (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        {
+            payload->payload_length = 4;
+            payload->data_length = 2;
+
+            payload->data_array[0] = systemVariables->dispensed_pills;
+            payload->data_array[1] = ~payload->data_array[0];
+
+            package_data(payload->data_array, payload->data_length, payload->payload_array, EEPROM_ADDR_DISPENSED_PILLS);
+
+            const int operation_return = save_data(payload->payload_array, payload->payload_length);
+            sleep_ms(5);
+
+            if (operation_return != 4)
+            {
+                printf("[ERR] Dispensed pills save failed.\n");
+            }
+
+            return 0;
+        }
+
         // Saves the state of movement during the CALIB or DISPENSE state { 0 = wasn't moving, 1 = was moving }
         int write_movement_state (struct Eeprom_Payload *payload, const bool isRunning)
         {
@@ -246,6 +300,7 @@
 
             return 0;
         }
+
 
     /* GENERAL READING & SAVING FUNCTIONS */
         // SAVE DATA TO EEPROM (BYTE PER MEMORY ADDRESS (0xXX) IN 0x50 DEVICE)
@@ -296,33 +351,4 @@
 
             return 0;
         }
-
-
-
-
-
-
-
-/*              STATE                    TYPE            VALUE           ADDR        
-            1. Program state            uint8_t         0-4 (enum)      0x0000      
-            2. Dispenser position       uint8_t         0-7 (int)       0x0002      
-            3. Average steps            uint16_t        ~4096 (int)     0x0004      
-            4  Dispenser is moving      uint8_t         0-1 (bool)      0x0008      
-*/
-
-
-
-
-// Program state is written everytime it's changed
-
-
-// Dispenser position is written everytime it finishes moving a 1/8 step 
-
-
-// Average steps takes 2 bytes of memory and is written:    
-//      after calibration: avg_steps 
-//      when dispensing is done wite 0 to indicate that calibration haven't been done
-
-
-// Dispenser is moving is written everytime dispenser starts moving and when it stops
 

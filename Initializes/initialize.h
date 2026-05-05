@@ -28,18 +28,15 @@
             // Marks the current total amount of steps in the mode DISPENSE
             int dispenser_position;
 
+            // Amount of pills that has been dispensed
+            uint dispensed_pills;
+
             // Shows whether the motor was running / not running
             bool isRunning;
 
 
-        // Determines when the system was calibrated in the program state { CALIB }
-        bool isCalibrated;
-
         // Timestamp for controlling the dispense happening at intervals.
         absolute_time_t dispense_start_time;
-
-        // Amount of pills that has been dispensed
-        uint dispensed_pills;
 
         // Determines whether the Rotary Encoder SW (GP12) has been pressed.
         bool button_pressed;

@@ -16,7 +16,6 @@
     #include "Eeprom/eeprom.h"
 
 
-
 /* MAIN */
 int main() {
     /* SYSTEM STRUCTURES */
@@ -134,10 +133,7 @@ int main() {
 
                 init_sys_variables(&systemVariables); // init variables for a fresh start
 
-                /* EEPROM FUNCTIONALITY */
-                write_program_state(&systemVariables, &payloadController);
-                write_avg_steps(&systemVariables, &payloadController);
-                write_dispenser_position(&systemVariables, &payloadController);
+                reset_system_variables(&systemVariables, &payloadController);
                 print_system_status(&systemVariables);
 
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);

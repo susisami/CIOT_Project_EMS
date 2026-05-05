@@ -22,6 +22,7 @@
         }
     }
 
+
     // CLEAR STDIN IF BUFFER IS EXCEEDED
     void clear_stdin(const char *str)
     {
@@ -32,6 +33,7 @@
         }
     }
 
+
     // MODIFIES / FORMATS STRING GIVEN AS A PARAMETER
     void modify_string(char *str)
     {
@@ -39,12 +41,10 @@
 
         for (int i = 0; i < len; i++)
         {
-            if (isupper(str[i]))
-            {
-                str[i] = tolower(str[i]);
-            }
+            str[i] = tolower( (int) str[i]);
         }
     }
+
 
     // REMOVE SPECIFIC CHARACTER FROM STRING
     void remove_char(char *str, char c)
@@ -59,6 +59,7 @@
         }
         str[j] = '\0';
     }
+
 
     // VALIDATES INPUT AS A VALID LONG INTEGER = TRUE, OR FALSE
     bool is_integer(const char *str)
