@@ -27,14 +27,19 @@ int main() {
 
         // LoRaWan handling:
         lora_module_t lora_module;
-    
-    
+
+
     /* INITIALIZE FUNCTIONS */
     stdio_init_all();
     init_gpio_all();
     init_i2c_instance();
     init_sys_variables(&systemVariables);
     init_lora(&lora_module);
+
+    // you can test lora messages even not connected to server
+    //uncomment
+    //lora_module.state = LORA_READY;
+    //lora_module.joined = true;
 
 
     /* QUEUE INITIALIZES */
@@ -56,31 +61,32 @@ int main() {
     /* READ PREVIOUS SETTINGS & START SYSTEM CONTROL PROGRAM */
     load_eeprom_settings(&systemVariables);
     print_system_status(&systemVariables);
+    lora_power_loss_event(&lora_module, &systemVariables);
 
 
     while (true)
     {
-        switch (systemVariables.program_state) 
+        switch (systemVariables.program_state)
         {
             case PRE_CALIB: // BLINK LED UNTIL BUTTON IS PRESSED //
 
-                if (systemVariables.button_pressed) // ROT_SW button pressed 
-                {                    
+                if (systemVariables.button_pressed) // ROT_SW button pressed
+                {
                     systemVariables.button_pressed = false;
                     gpio_put(LED_2, false);
-                    
+
                     systemVariables.program_state = CALIB;
                     write_program_state(&systemVariables, &payloadController);
 
                 }
                 else // BLINK LED
-                { 
+                {
                     gpio_put(LED_2, !gpio_get(LED_2));
 
                     // sleep LED_BLINK_MS, stop sleeping if queue is not empty (== button has been pressed)
                     for (int i = 0; i < LED_BLINK_SLOW_MS && !queue_try_peek(&button_queue, NULL); i++)
                     {
-                        sleep_ms(1); 
+                        sleep_ms(1);
                     }
 
                     systemVariables.program_state = PRE_CALIB;
@@ -91,9 +97,9 @@ int main() {
             case CALIB: // CALIBRATE MOTOR //
 
                 // CALIBRATION RUN
-                write_movement_state(&payloadController, true);
+                write_movement_state(&systemVariables, &payloadController, true);
                 motor_calibration(&systemVariables);
-                write_movement_state(&payloadController, false);
+                write_movement_state(&systemVariables, &payloadController, false);
 
                 // AFTER CALIBRATION RUN
                 systemVariables.program_state = PRE_DISPENSE;
@@ -103,21 +109,21 @@ int main() {
                 print_system_status(&systemVariables);
 
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
-                
+
                 break;
-                
-                
+
+
             case PRE_DISPENSE: // WAIT FOR A BUTTON PRESS //
-            
-                if (systemVariables.button_pressed) 
-                {    
+
+                if (systemVariables.button_pressed)
+                {
                     systemVariables.program_state = DISPENSE;
                     write_program_state(&systemVariables, &payloadController);
-                    
+
                     gpio_put(LED_2, false);
                     systemVariables.button_pressed = false;
                 }
-                else 
+                else
                 {
                     gpio_put(LED_2, true);
                     systemVariables.program_state = PRE_DISPENSE;

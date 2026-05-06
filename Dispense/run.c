@@ -12,7 +12,7 @@
 
 /* FUNCTIONS */
 
-int stepper_motor_run(const uint direction)
+int stepper_motor_run(const uint direction, const uint max_speed)
 {
     static const int driving_sequence[MTR_PHASE_AMOUNT][MTR_COILS] = {
         {1,0,0,0},
@@ -51,13 +51,13 @@ int stepper_motor_run(const uint direction)
     {
         i = 0;
 
-        if (carousel_speed > 1) carousel_speed --;
+        if (carousel_speed > max_speed) carousel_speed --;
     }
 
     return 0;
 }
 
-int run_motor (const uint steps_per_rev, int times)
+int run_motor (const uint steps_per_rev, int times, uint max_speed)
 {
     uint ttl_steps = 0;
     uint direction = CLOCKWISE;
@@ -70,7 +70,7 @@ int run_motor (const uint steps_per_rev, int times)
 
     while (ttl_steps < times * (steps_per_rev / 8))
     {
-        stepper_motor_run(direction);
+        stepper_motor_run(direction, max_speed);
         ttl_steps++;
     }
 

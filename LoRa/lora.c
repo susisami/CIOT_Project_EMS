@@ -4,7 +4,10 @@
 #include "lora.h"
 #include "hardware/uart.h"
 #include "../.env/lora_app_key.h"
+#include "../Initializes/initialize.h" // IWYU pragma: keep
 #include "../Config/config.h"
+
+
 
 
 //Forget everything the module said
@@ -136,6 +139,9 @@ static bool lora_step_join(char *buf) {
             printf("[LoRa RX] %s\n", buf);
 
             if (strstr(buf, "+JOIN: Done"))
+                return true;
+
+            if (strstr(buf, "+JOIN: Joined already"))
                 return true;
 
             if (strstr(buf, "Join failed"))
@@ -286,6 +292,34 @@ bool lora_send_event(lora_module_t *module, lora_event_t event, const char *data
     return false;
 }
 
+void lora_power_loss_event(lora_module_t *lora, sys_info_t *systemVariables)
+{
+
+    // Otherwise → power loss happened
+    switch (systemVariables->program_state) {
+
+        case PRE_CALIB:
+            lora_send_event(lora, EVENT_POWER_LOSS_PRE_CALIB, NULL);
+            break;
+
+        case CALIB:
+            lora_send_event(lora, EVENT_POWER_LOSS_CALIB, NULL);
+            break;
+
+        case PRE_DISPENSE:
+            lora_send_event(lora, EVENT_POWER_LOSS_PRE_DISPENSE, NULL);
+            break;
+
+        case DISPENSE:
+            if (systemVariables->isRunning) {
+                lora_send_event(lora, EVENT_POWER_LOSS_DISPENSE_RUNNING, NULL);
+            } else {
+                lora_send_event(lora, EVENT_POWER_LOSS_DISPENSE_IDLE, NULL);
+            }
+            break;
+    }
+}
+
 //state
 
 lora_state_t lora_get_state(lora_module_t *module) {
@@ -301,7 +335,11 @@ const char *lora_event_to_string(lora_event_t event) {
         case EVENT_PILL_DISPENSED: return "PILL_DISPENSED";
         case EVENT_PILL_NOT_DISPENSED: return "PILL_NOT_DISPENSED";
         case EVENT_DISPENSER_EMPTY: return "DISPENSER_EMPTY";
-        case EVENT_POWER_LOSS: return "POWER_LOSS";
+        case EVENT_POWER_LOSS_PRE_CALIB: return "PWR_LOSS_PRE_CALIB";
+        case EVENT_POWER_LOSS_CALIB: return "PWR_LOSS_CALIB";
+        case EVENT_POWER_LOSS_PRE_DISPENSE: return "PWR_LOSS_PRE_DISP";
+        case EVENT_POWER_LOSS_DISPENSE_IDLE: return "PWR_LOSS_DISP_IDLE";
+        case EVENT_POWER_LOSS_DISPENSE_RUNNING: return "PWR_LOSS_DISP_RUN";
         default: return "UNKNOWN";
     }
 }

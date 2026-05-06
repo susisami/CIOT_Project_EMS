@@ -29,7 +29,7 @@
         #define DISPENSE_TIMEOUT_MS 1000 // 30 000 ms
         #define PIEZO_TIMEOUT_MS 90 // t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
         #define PIEZO_DROP_TIMEOUT_MS 60
-        #define LORA_JOIN_TIMEOUT_MS 500
+        #define LORA_JOIN_TIMEOUT_MS 20000
         #define LORA_MSG_SEND_TIMEOUT_MS 5000
 
 
@@ -72,6 +72,7 @@
         #define EEPROM_ADDR_DISPENSER_POSITION 0x0006   // 6 - 7
         #define EEPROM_ADDR_DISPENSER_ON_MOVE 0x0008    // 8 - 9
         #define EEPROM_ADDR_DISPENSED_PILLS 0x000A      // 10 - 11
+        #define EEPROM_ADDR_GAP_STEPS 0x000C      // 12 - 13
         #define EEPROM_TOTAL_LOG_SAVES 0x0064           // 100 - 101
 
         // READS & WRITES

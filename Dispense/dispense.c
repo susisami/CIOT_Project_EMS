@@ -28,9 +28,9 @@
                 gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
 
                 // EEPROM FUNCTIONALITY-
-                write_movement_state(payloadController, true);
-                run_motor(systemVariables->avg_steps, 1);
-                write_movement_state(payloadController, false);
+                write_movement_state(systemVariables,payloadController, true);
+                run_motor(systemVariables->avg_steps, 1, 10);
+                write_movement_state(systemVariables,payloadController, false);
 
                 systemVariables->dispenser_position++;
                 write_dispenser_position(systemVariables, payloadController);

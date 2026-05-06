@@ -7,7 +7,8 @@
 
 
 /* ENUMS */
-
+// forward declaration
+typedef struct SystemInformation sys_info_t;
     // LORA STATES
     typedef enum {
         LORA_UNINITIALIZED,
@@ -24,7 +25,11 @@
         EVENT_PILL_DISPENSED,
         EVENT_PILL_NOT_DISPENSED,
         EVENT_DISPENSER_EMPTY,
-        EVENT_POWER_LOSS
+        EVENT_POWER_LOSS_PRE_CALIB,
+        EVENT_POWER_LOSS_CALIB,
+        EVENT_POWER_LOSS_PRE_DISPENSE,
+        EVENT_POWER_LOSS_DISPENSE_IDLE,
+        EVENT_POWER_LOSS_DISPENSE_RUNNING
     } lora_event_t;
 
     
@@ -60,5 +65,8 @@
 
     // Convert event type to message string
     const char* lora_event_to_string(lora_event_t event);
+
+    void lora_power_loss_event(lora_module_t *lora, sys_info_t *systemVariables);
+
 
 #endif // LORA_H

@@ -22,7 +22,7 @@
             int print_system_status (const struct SystemInformation *systemVariables);
 
             // RESETS SYSTEM VARIABLES' ADDRESSES INSIDE EEPROM
-            int reset_system_variables(const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
+            int reset_system_variables(struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
 
 
         /* READING OPERATIONS */
@@ -56,7 +56,7 @@
             int write_dispensed_pills (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
 
             // Saves the state of movement during the CALIB or DISPENSE state { 0 = wasn't moving, 1 = was moving }
-            int write_movement_state (struct Eeprom_Payload *payload, bool isRunning);
+            int write_movement_state (struct SystemInformation *systemVariables, struct Eeprom_Payload *payload, bool isRunning);
 
 
         /* GENERAL READING & SAVING FUNCTIONS */

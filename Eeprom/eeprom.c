@@ -42,17 +42,17 @@
 
             while (!queue_try_remove(&opto_queue, &edgeDetected))
             {
-                stepper_motor_run(COUNTERCLOCKWISE);
+                stepper_motor_run(COUNTERCLOCKWISE,1);
             }
 
             gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL, false);
 
             for (int i = 0; i < systemVariables->avg_steps / 32; i++)
             {
-                stepper_motor_run(COUNTERCLOCKWISE);
+                stepper_motor_run(COUNTERCLOCKWISE, 1);
             }
 
-            run_motor(systemVariables->avg_steps, systemVariables->dispenser_position);
+            run_motor(systemVariables->avg_steps, systemVariables->dispenser_position, 1);
 
             return 0;
         }
@@ -72,13 +72,13 @@
         }
 
         // Reset eeprom system variables
-        int reset_system_variables(const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        int reset_system_variables(struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
         {
             write_program_state(systemVariables, payload);
             write_avg_steps(systemVariables, payload);
             write_dispenser_position(systemVariables, payload);
             write_dispensed_pills(systemVariables, payload);
-            write_movement_state(payload, false);
+            write_movement_state(systemVariables,payload, false);
 
             return 0;
         }
@@ -280,8 +280,10 @@
         }
 
         // Saves the state of movement during the CALIB or DISPENSE state { 0 = wasn't moving, 1 = was moving }
-        int write_movement_state (struct Eeprom_Payload *payload, const bool isRunning)
+        int write_movement_state (struct SystemInformation *systemVariables,struct Eeprom_Payload *payload, const bool isRunning)
         {
+            systemVariables->isRunning = isRunning;
+
             payload->payload_length = 4;
             payload->data_length = 2;
 
