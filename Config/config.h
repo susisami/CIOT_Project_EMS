@@ -29,7 +29,7 @@
         #define DISPENSE_TIMEOUT_MS 1000 // 30 000 ms
         #define PIEZO_TIMEOUT_MS 90 // t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
         #define PIEZO_DROP_TIMEOUT_MS 60
-        #define LORA_JOIN_TIMEOUT_MS 20000
+        #define LORA_JOIN_TIMEOUT_MS 1000 // 20 000??
         #define LORA_MSG_SEND_TIMEOUT_MS 5000
 
 

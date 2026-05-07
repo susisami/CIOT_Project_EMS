@@ -1,8 +1,10 @@
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "pico/util/queue.h" // IWYU pragma: keep
-#include "../Initializes/initialize.h"
+#include "../Initializes/initialize.h" // IWYU pragma: keep
 #include "../Interrupt/interrupt.h"
 #include "../Config/config.h"
+
+
 
 
 /* ENUMS */
@@ -15,44 +17,73 @@
 
     
 /* FUNCTION PROTOTYPES */
-    void calibrate(int *steps_per_rotation, bool *opto_fork_edge, int steps[MTR_PHASE_AMOUNT][MTR_COILS]);
-    void motor_step(int steps[MTR_PHASE_AMOUNT][MTR_COILS], int step_nr);
+    void motor_calibration(uint *steps_per_rotation, uint *opto_gap_steps);
+    void motor_step(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int step_nr);
     void position_correction(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int calibration_correction_steps);
-    void get_avg_steps(bool *opto_fork_edge, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[DIVIDE_ROTATION]);
+    void get_avg_steps(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[DIVIDE_ROTATION]);
 
 
 
 /* FUNCTIONS */
 
-// MAIN CALIBRATION FUNCTION
 
-    void motor_calibration(sys_info_t *systemVariables)
+    // CALIBRATE THE MOTOR
+    /*
+        1.  count average steps in two parts divided by the two opto edges
+        
+        2.  correct the dispenser wheel position 
+                if (count_first_avg > count_second_avg) {reverse half of the count_second_avg}  
+
+                else {continue clockwise for half of the count_first_avg}
+    */
+    void motor_calibration(uint *steps_per_rotation, uint *opto_gap_steps)
     {
-        // INTERRUPT
+        // ENABLE INTERRUPT
         gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true);
 
-
         // VARIABLES
-        int steps_per_rotation = 0;
-        bool opto_fork_edge = false;
+        int count_first_avg = 0;
+        int count_second_avg = 0;
+        int correction_steps = 0;
+        int results[DIVIDE_ROTATION];
+
         int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS] = { {1,0,0,0}, {1,1,0,0}, {0,1,0,0}, {0,1,1,0}, {0,0,1,0}, {0,0,1,1}, {0,0,0,1}, {1,0,0,1} };
-        
 
-        // CALIBRATE MOTOR
-        calibrate(&steps_per_rotation, &opto_fork_edge, mtr_steps_arr);
 
+
+        // GET AVERAGE STEPS
+        get_avg_steps(mtr_steps_arr, results);
+
+        count_first_avg = results[0];
+        count_second_avg = results[1];
+
+        *steps_per_rotation = count_first_avg + count_second_avg;
+
+
+        // CORRECT THE POSITION
+        if (count_first_avg < count_second_avg)
+        {
+            correction_steps = count_first_avg / 2; // continue half of the first step count
+            *opto_gap_steps = count_first_avg;
+        }
+        else if (count_first_avg > count_second_avg)
+        {
+            correction_steps = count_second_avg / -2; // reverse half of the second step count
+            *opto_gap_steps = count_second_avg;
+        }
         
+        position_correction(mtr_steps_arr, correction_steps);
+
+
         // DISABLE INTERRUPT
         gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, false);
-
-
-        // VALUES TO MAIN PROGRAM !
-        systemVariables->avg_steps = steps_per_rotation;
     }
 
 
+
+
 // GET AVERAGE AMOUNT OF STEPS PER ROTATION
-    void get_avg_steps(bool *opto_fork_edge, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[DIVIDE_ROTATION])
+    void get_avg_steps(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[DIVIDE_ROTATION])
     {
         /*
             Divide full rotation into two segments/variables:
@@ -71,6 +102,7 @@
         int count_first = 0; // steps between   1st and 2nd   opto edge
         int count_second = 0; // steps between   2nd and 3rd   opto edge
         int counter = CALIBRATION_ROTATION_TIMES; 
+        bool dummy_opto_edge;
         calib_state_t state = WAIT_FIRST_EDGE;
 
 
@@ -81,7 +113,7 @@
             {
                 motor_step(mtr_steps_arr, step_nr);
 
-                bool change_state = queue_try_remove(&opto_queue, &opto_fork_edge);
+                bool change_state = queue_try_remove(&opto_queue, &dummy_opto_edge);
 
 
                 // STATE MACHINE
@@ -110,7 +142,7 @@
                         break;
 
                     // Count until the next edge (second section between opto edges) 
-                    //      and return to COUNT_FIRST until counter==0 (= CALIBRATED) 
+                    //      and return to COUNT_FIRST until counter==0 (= motor_calibrationD) 
                     case COUNT_SECOND:
                         if (change_state)
                         {
@@ -144,52 +176,6 @@
         results[1] = (float)count_second / CALIBRATION_ROTATION_TIMES;
     }
 
-
-// CALIBRATE THE MOTOR
-    void calibrate(int *steps_per_rotation, bool *opto_fork_edge, int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS])
-    {
-        /*
-            1.  run get_avg_steps()
-            
-            2.  if (count_first_avg > count_second_Avg) {reverse half of the count_second_avg}  
-
-                else {continue clockwise for half of the count_first_avg}
-        */
-
-        // VARIABLES
-        int count_first_avg = 0;
-        int count_second_avg = 0;
-        int correction_steps = 0;
-        int results[DIVIDE_ROTATION];
-
-        // ENABLE INTERRUPT
-        gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true);
-
-        // GET AVERAGE STEPS
-        get_avg_steps(opto_fork_edge, mtr_steps_arr, results);
-
-        count_first_avg = results[0];
-        count_second_avg = results[1];
-
-        *steps_per_rotation = count_first_avg + count_second_avg;
-
-
-        // CORRECT THE POSITION
-        if (count_first_avg < count_second_avg)
-        {
-            correction_steps = count_first_avg / 2; // continue half of the first step count
-        }
-        else if (count_first_avg > count_second_avg)
-        {
-            correction_steps = count_second_avg / -2; // reverse half of the second step count
-        }
-        
-        position_correction(mtr_steps_arr, correction_steps);
-
-
-        // DISABLE INTERRUPT
-        gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, false);
-    }
 
         
 // MOTOR DRIVERS

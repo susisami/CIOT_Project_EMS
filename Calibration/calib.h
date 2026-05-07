@@ -2,10 +2,10 @@
 #define CALIB_H
 
 /* LIBRARIES */
-    #include "../Initializes/initialize.h"
+    #include "../Initializes/initialize.h" // IWYU pragma: keep
 
     
 /* FUNCTION DECLARATIONS */
-    void motor_calibration(sys_info_t *systemVariables);
+    void motor_calibration(uint *steps_per_rotation, uint *opto_gap_steps);
 
 #endif //CALIB_H

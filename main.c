@@ -98,7 +98,7 @@ int main() {
 
                 // CALIBRATION RUN
                 write_movement_state(&systemVariables, &payloadController, true);
-                motor_calibration(&systemVariables);
+                motor_calibration(&systemVariables.avg_steps, &systemVariables.opto_gap_steps);
                 write_movement_state(&systemVariables, &payloadController, false);
 
                 // AFTER CALIBRATION RUN

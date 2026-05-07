@@ -29,7 +29,7 @@
 
                 // EEPROM FUNCTIONALITY-
                 write_movement_state(systemVariables,payloadController, true);
-                run_motor(systemVariables->avg_steps, 1, 10);
+                run_motor(systemVariables->avg_steps, 1, 1);
                 write_movement_state(systemVariables,payloadController, false);
 
                 systemVariables->dispenser_position++;
