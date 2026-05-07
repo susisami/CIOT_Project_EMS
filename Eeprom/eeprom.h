@@ -22,7 +22,7 @@
             int print_system_status (const struct SystemInformation *systemVariables);
 
             // RESETS SYSTEM VARIABLES' ADDRESSES INSIDE EEPROM
-            int reset_system_variables(struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
+            int reset_system_variables(struct SystemInformation *systemVariables);
 
 
         /* READING OPERATIONS */
@@ -47,22 +47,22 @@
 
         /* WRITING OPERATIONS */
             // Saves the program state to the EEPROM from systemVariables struct { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE }
-            int write_program_state (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
+            int write_program_state (const struct SystemInformation *systemVariables);
 
             // Saves the average step size to the EEPROM from systemVariables struct { 4096 +- 3 }
-            int write_avg_steps (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
+            int write_avg_steps (const struct SystemInformation *systemVariables);
 
             // Saves the opto gap steps to the EEPROM
-            int write_opto_gap_steps (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
+            int write_opto_gap_steps (const struct SystemInformation *systemVariables);
 
             // Saves the most recent dispenser position to the EEPROM from systemVariables struct { 0 - 7 }
-            int write_dispenser_position (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
+            int write_dispenser_position (const struct SystemInformation *systemVariables);
 
             // Saves the most recent dispenser position to the EEPROM from systemVariables struct { 0 - 7 }
-            int write_dispensed_pills (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
+            int write_dispensed_pills (const struct SystemInformation *systemVariables);
 
             // Saves the state of movement during the CALIB or DISPENSE state { 0 = wasn't moving, 1 = was moving }
-            int write_movement_state (struct SystemInformation *systemVariables, struct Eeprom_Payload *payload, bool isRunning);
+            int write_movement_state (struct SystemInformation *systemVariables, bool isRunning);
 
 
         /* GENERAL READING & SAVING FUNCTIONS */

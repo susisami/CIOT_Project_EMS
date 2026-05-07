@@ -47,7 +47,7 @@
 
             gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL, false);
 
-            for (int i = 0; i < systemVariables->avg_steps / 32; i++)
+            for (int i = 0; i < systemVariables->opto_gap_steps / 2; i++)
             {
                 stepper_motor_run(COUNTERCLOCKWISE, 1);
             }
@@ -66,20 +66,21 @@
             printf ("[AVG-STEPS]: %d\n", systemVariables->avg_steps);
             printf ("[OPTO-G-STEPS]: %d\n", systemVariables->opto_gap_steps);
             printf ("[DISP-POS]: %d\n", systemVariables->dispenser_position);
-            printf("[DISP-PILLS]: %d\n", systemVariables->dispensed_pills);
+            printf ("[DISP-PILLS]: %d\n", systemVariables->dispensed_pills);
             printf ("[MOVEMENT]: %d\n", systemVariables->isRunning);
 
             return 0;
         }
 
         // Reset eeprom system variables
-        int reset_system_variables(struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        int reset_system_variables(struct SystemInformation *systemVariables)
         {
-            write_program_state(systemVariables, payload);
-            write_avg_steps(systemVariables, payload);
-            write_dispenser_position(systemVariables, payload);
-            write_dispensed_pills(systemVariables, payload);
-            write_movement_state(systemVariables,payload, false);
+            write_program_state(systemVariables);
+            write_avg_steps(systemVariables);
+            write_opto_gap_steps(systemVariables);
+            write_dispenser_position(systemVariables);
+            write_dispensed_pills(systemVariables);
+            write_movement_state(systemVariables, false);
 
             return 0;
         }
@@ -154,12 +155,13 @@
             memory_address[0] = EEPROM_ADDR_GAP_STEPS >> 8 & 0xFF;
             memory_address[1] = EEPROM_ADDR_GAP_STEPS & 0xFF;
 
-            read_data(data_array, MAX_TTL_READS / 2, memory_address);
-            // printf("Opto Gap Steps [S4]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
+            read_data(data_array, MAX_TTL_READS, memory_address);
+            // printf("Opto Gap Steps (1 / 2) [S4]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
+            // printf("Opto Gap Steps (2 / 2) [S4]: (NORMAL) %d | (INVERTED) %d\n", data_array[2], data_array[3]);
 
-            if (validate_state(data_array, MAX_TTL_READS / 2))
+            if (validate_state(data_array, MAX_TTL_READS))
             {
-                systemVariables->opto_gap_steps = data_array[0];
+                systemVariables->opto_gap_steps = (data_array[0] << 8) | data_array[2];
                 read_dispenser_position(systemVariables, data_array, memory_address);
             }
             else { printf("Validation error at [EEPROM: Opto Gap Steps]\n"); }
@@ -206,20 +208,18 @@
 
     /* WRITING OPERATIONS */
         // Saves the program state to the EEPROM from systemVariables struct { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE }
-        int write_program_state (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        int write_program_state (const struct SystemInformation *systemVariables)
         {
-            payload->payload_length = 4;
-            payload->data_length = 2;
+            payload_control_t payload;
+            payload.data_length = 2;
+            payload.payload_length = payload.data_length + ADDRESS_BYTES;
 
-            payload->data_array[0] = systemVariables->program_state;
-            payload->data_array[1] = ~payload->data_array[0];
+            payload.data_array[0] = systemVariables->program_state;
+            payload.data_array[1] = ~payload.data_array[0];
 
-            package_data(payload->data_array, payload->data_length, payload->payload_array, EEPROM_ADDR_PROGRAM_STATE);
+            package_data(payload.data_array, payload.data_length, payload.payload_array, EEPROM_ADDR_PROGRAM_STATE);
 
-            const int operation_return = save_data(payload->payload_array, payload->payload_length);
-            sleep_ms(5);
-
-            if (operation_return != 4)
+            if (save_data(payload.payload_array, payload.payload_length) != payload.payload_length)
             {
                 printf("[ERR] Program state save failed.\n");
             }
@@ -228,25 +228,23 @@
         }
 
         // Saves the average step size to the EEPROM from systemVariables struct { 4096 +- 3 }
-        int write_avg_steps (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        int write_avg_steps (const struct SystemInformation *systemVariables)
         {
-            payload->payload_length = 6;
-            payload->data_length = 4;
+            payload_control_t payload;
+            payload.data_length = 4;
+            payload.payload_length = payload.data_length + ADDRESS_BYTES;
 
             const uint16_t avg_steps_in_16_bits = systemVariables->avg_steps;
 
             // TWO BYTE NORMALS & INVERSIONS
-            payload->data_array[0] = avg_steps_in_16_bits >> 8 & 0xFF;
-            payload->data_array[1] = ~payload->data_array[0];
-            payload->data_array[2] = avg_steps_in_16_bits & 0xFF;
-            payload->data_array[3] = ~payload->data_array[2];
+            payload.data_array[0] = avg_steps_in_16_bits >> 8 & 0xFF;
+            payload.data_array[1] = ~payload.data_array[0];
+            payload.data_array[2] = avg_steps_in_16_bits & 0xFF;
+            payload.data_array[3] = ~payload.data_array[2];
 
-            package_data(payload->data_array, payload->data_length, payload->payload_array, EEPROM_ADDR_AVG_STEPS);
+            package_data(payload.data_array, payload.data_length, payload.payload_array, EEPROM_ADDR_AVG_STEPS);
 
-            const int operation_return = save_data(payload->payload_array, payload->payload_length);
-            sleep_ms(5);
-
-            if (operation_return != 6)
+            if (save_data(payload.payload_array, payload.payload_length) != payload.payload_length)
             {
                 printf("[ERR] Average step size save failed.\n");
             }
@@ -254,20 +252,23 @@
             return 0;
         }
 
-        int write_opto_gap_steps (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        int write_opto_gap_steps (const struct SystemInformation *systemVariables)
         {
-            payload->payload_length = 4;
-            payload->data_length = 2;
+            payload_control_t payload;
+            payload.data_length = 4;
+            payload.payload_length = payload.data_length + ADDRESS_BYTES;
 
-            payload->data_array[0] = systemVariables->opto_gap_steps;
-            payload->data_array[1] = ~payload->data_array[0];
+            const uint16_t opto_steps_in_16_bits = systemVariables->opto_gap_steps;
 
-            package_data(payload->data_array, payload->data_length, payload->payload_array, EEPROM_ADDR_GAP_STEPS);
+            // TWO BYTE NORMALS & INVERSIONS
+            payload.data_array[0] = opto_steps_in_16_bits >> 8 & 0xFF;
+            payload.data_array[1] = ~payload.data_array[0];
+            payload.data_array[2] = opto_steps_in_16_bits & 0xFF;
+            payload.data_array[3] = ~payload.data_array[2];
 
-            const int operation_return = save_data(payload->payload_array, payload->payload_length);
-            sleep_ms(5);
+            package_data(payload.data_array, payload.data_length, payload.payload_array, EEPROM_ADDR_GAP_STEPS);
 
-            if (operation_return != 4)
+            if (save_data(payload.payload_array, payload.payload_length) != payload.payload_length)
             {
                 printf("[ERR] Opto Gap Steps save failed.\n");
             }
@@ -276,20 +277,18 @@
         }
 
         // Saves the most recent dispenser position to the EEPROM from systemVariables struct { 0 - 7 }
-        int write_dispenser_position (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        int write_dispenser_position (const struct SystemInformation *systemVariables)
         {
-            payload->payload_length = 4;
-            payload->data_length = 2;
+            payload_control_t payload;
+            payload.data_length = 2;
+            payload.payload_length = payload.data_length + ADDRESS_BYTES;
 
-            payload->data_array[0] = systemVariables->dispenser_position;
-            payload->data_array[1] = ~payload->data_array[0];
+            payload.data_array[0] = systemVariables->dispenser_position;
+            payload.data_array[1] = ~payload.data_array[0];
 
-            package_data(payload->data_array, payload->data_length, payload->payload_array, EEPROM_ADDR_DISPENSER_POSITION);
+            package_data(payload.data_array, payload.data_length, payload.payload_array, EEPROM_ADDR_DISPENSER_POSITION);
 
-            const int operation_return = save_data(payload->payload_array, payload->payload_length);
-            sleep_ms(5);
-
-            if (operation_return != 4)
+            if (save_data(payload.payload_array, payload.payload_length) != payload.payload_length)
             {
                 printf("[ERR] Dispenser position save failed.\n");
             }
@@ -298,20 +297,18 @@
         }
 
         // Saves the amount of pills that was dispensed in a run
-        int write_dispensed_pills (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        int write_dispensed_pills (const struct SystemInformation *systemVariables)
         {
-            payload->payload_length = 4;
-            payload->data_length = 2;
+            payload_control_t payload;
+            payload.data_length = 2;
+            payload.payload_length = payload.data_length + ADDRESS_BYTES;
 
-            payload->data_array[0] = systemVariables->dispensed_pills;
-            payload->data_array[1] = ~payload->data_array[0];
+            payload.data_array[0] = systemVariables->dispensed_pills;
+            payload.data_array[1] = ~payload.data_array[0];
 
-            package_data(payload->data_array, payload->data_length, payload->payload_array, EEPROM_ADDR_DISPENSED_PILLS);
+            package_data(payload.data_array, payload.data_length, payload.payload_array, EEPROM_ADDR_DISPENSED_PILLS);
 
-            const int operation_return = save_data(payload->payload_array, payload->payload_length);
-            sleep_ms(5);
-
-            if (operation_return != 4)
+            if (save_data(payload.payload_array, payload.payload_length) != payload.payload_length)
             {
                 printf("[ERR] Dispensed pills save failed.\n");
             }
@@ -320,22 +317,20 @@
         }
 
         // Saves the state of movement during the CALIB or DISPENSE state { 0 = wasn't moving, 1 = was moving }
-        int write_movement_state (struct SystemInformation *systemVariables,struct Eeprom_Payload *payload, const bool isRunning)
+        int write_movement_state (struct SystemInformation *systemVariables, const bool isRunning)
         {
             systemVariables->isRunning = isRunning;
 
-            payload->payload_length = 4;
-            payload->data_length = 2;
+            payload_control_t payload;
+            payload.data_length = 2;
+            payload.payload_length = payload.data_length + ADDRESS_BYTES;
 
-            payload->data_array[0] = isRunning;
-            payload->data_array[1] = ~payload->data_array[0];
+            payload.data_array[0] = isRunning;
+            payload.data_array[1] = ~payload.data_array[0];
 
-            package_data(payload->data_array, payload->data_length, payload->payload_array, EEPROM_ADDR_DISPENSER_ON_MOVE);
+            package_data(payload.data_array, payload.data_length, payload.payload_array, EEPROM_ADDR_DISPENSER_ON_MOVE);
 
-            const int operation_return = save_data(payload->payload_array, payload->payload_length);
-            sleep_ms(5);
-
-            if (operation_return != 4)
+            if (save_data(payload.payload_array, payload.payload_length) != payload.payload_length)
             {
                 printf("[ERR] System movement state save failed.\n");
             }
@@ -346,9 +341,12 @@
 
     /* GENERAL READING & SAVING FUNCTIONS */
         // SAVE DATA TO EEPROM (BYTE PER MEMORY ADDRESS (0xXX) IN 0x50 DEVICE)
-        int save_data(const uint8_t *packed_data, const int len)
+        int save_data(const uint8_t *payload, const int len)
         {
-            return i2c_write_blocking(i2c0, 0x50, packed_data, len, false);
+            int bytes_written = i2c_write_blocking(i2c0, 0x50, payload, len, false);
+            sleep_ms(5);
+            
+            return bytes_written;
         }
 
 

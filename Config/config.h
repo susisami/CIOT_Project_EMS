@@ -69,10 +69,10 @@
         // ADDRESSES
         #define EEPROM_ADDR_PROGRAM_STATE 0x0000        // 0 - 1
         #define EEPROM_ADDR_AVG_STEPS 0x0002            // 2 - 5
-        #define EEPROM_ADDR_GAP_STEPS 0x0006            // 6 - 7
-        #define EEPROM_ADDR_DISPENSER_ON_MOVE 0x0008    // 8 - 9
+        #define EEPROM_ADDR_GAP_STEPS 0x0006            // 6 - 9
         #define EEPROM_ADDR_DISPENSED_PILLS 0x000A      // 10 - 11
         #define EEPROM_ADDR_DISPENSER_POSITION 0x000C   // 12 - 13
+        #define EEPROM_ADDR_DISPENSER_ON_MOVE 0x000E    // 14 - 15
         #define EEPROM_TOTAL_LOG_SAVES 0x0064           // 100 - 101
 
         // READS & WRITES

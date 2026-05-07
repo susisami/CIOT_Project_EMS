@@ -3,12 +3,16 @@
     1. 
 
 
-# other fixes: 
-    1.
+# todo: 
+    1. check and think about queue size (joe said everyone tends to use queue size 10 (AI?))
 
-    2. 
-
-
+    2. eeprom write/read functions'
+        - parameters, instead of passing the whole struct, pass just the needed variable
+        - remove the linked structure (replace for example with read_all()/write_all()) 
+        - data_length automatically (make a function)
+        
+    3. calib.c: test logic, comment and improve the structure
+        
 # additional features: 
     1.
     log that stores the previous [5] runs:

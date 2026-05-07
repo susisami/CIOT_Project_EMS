@@ -22,9 +22,6 @@ int main() {
         // System Information:
         sys_info_t systemVariables;
 
-        // Eeprom data to send:
-        payload_control_t payloadController;
-
         // LoRaWan handling:
         lora_module_t lora_module;
 
@@ -76,7 +73,7 @@ int main() {
                     gpio_put(LED_2, false);
 
                     systemVariables.program_state = CALIB;
-                    write_program_state(&systemVariables, &payloadController);
+                    write_program_state(&systemVariables);
 
                 }
                 else // BLINK LED
@@ -97,15 +94,15 @@ int main() {
             case CALIB: // CALIBRATE MOTOR //
 
                 // CALIBRATION RUN
-                write_movement_state(&systemVariables, &payloadController, true);
+                write_movement_state(&systemVariables, true);
                 motor_calibration(&systemVariables.avg_steps, &systemVariables.opto_gap_steps);
-                write_movement_state(&systemVariables, &payloadController, false);
+                write_movement_state(&systemVariables, false);
 
                 // AFTER CALIBRATION RUN
                 systemVariables.program_state = PRE_DISPENSE;
-                write_program_state(&systemVariables, &payloadController);
-                write_avg_steps(&systemVariables, &payloadController);
-                write_opto_gap_steps(&systemVariables, &payloadController);
+                write_program_state(&systemVariables);
+                write_avg_steps(&systemVariables);
+                write_opto_gap_steps(&systemVariables);
 
                 print_system_status(&systemVariables);
 
@@ -119,7 +116,7 @@ int main() {
                 if (systemVariables.button_pressed)
                 {
                     systemVariables.program_state = DISPENSE;
-                    write_program_state(&systemVariables, &payloadController);
+                    write_program_state(&systemVariables);
 
                     gpio_put(LED_2, false);
                     systemVariables.button_pressed = false;
@@ -134,13 +131,13 @@ int main() {
 
             case DISPENSE: // DISPENSE PILLS //
 
-                dispense(&systemVariables, &payloadController, &lora_module);
+                dispense(&systemVariables, &lora_module);
 
                 lora_send_event(&lora_module, EVENT_DISPENSER_EMPTY, NULL);
 
                 init_sys_variables(&systemVariables); // init variables for a fresh start
 
-                reset_system_variables(&systemVariables, &payloadController);
+                reset_system_variables(&systemVariables);
                 print_system_status(&systemVariables);
 
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);

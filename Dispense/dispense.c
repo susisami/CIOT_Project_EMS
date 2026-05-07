@@ -15,7 +15,7 @@
 /* FUNCTIONS */
 
     // RUNS CAROUSEL FOR ONE STEP FORWARD, CHECKS DISPENSED PILLS, HANDLES LORAWAN + EEPROM FUNCTIONALITY
-    void dispense(sys_info_t *systemVariables, payload_control_t *payloadController, lora_module_t *lora_module)
+    void dispense(sys_info_t *systemVariables, lora_module_t *lora_module)
     {
         while (systemVariables->dispenser_position < DISPENSE_ROUNDS)
         {
@@ -28,12 +28,12 @@
                 gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
 
                 // EEPROM FUNCTIONALITY-
-                write_movement_state(systemVariables,payloadController, true);
+                write_movement_state(systemVariables, true);
                 run_motor(systemVariables->avg_steps, 1, 1);
-                write_movement_state(systemVariables,payloadController, false);
+                write_movement_state(systemVariables, false);
 
                 systemVariables->dispenser_position++;
-                write_dispenser_position(systemVariables, payloadController);
+                write_dispenser_position(systemVariables);
 
                 sleep_ms(PIEZO_TIMEOUT_MS);
 
@@ -41,7 +41,7 @@
 
                 while (queue_try_remove(&pills_queue, &dispensed)) { systemVariables->dispensed_pills++; }
 
-                write_dispensed_pills(systemVariables, payloadController);
+                write_dispensed_pills(systemVariables);
 
                 print_system_status(systemVariables);
 
