@@ -105,6 +105,7 @@ int main() {
                 systemVariables.program_state = PRE_DISPENSE;
                 write_program_state(&systemVariables, &payloadController);
                 write_avg_steps(&systemVariables, &payloadController);
+                write_opto_gap_steps(&systemVariables, &payloadController);
 
                 print_system_status(&systemVariables);
 

@@ -25,6 +25,9 @@
             // total steps per full cycle (approx. 4096)
             uint avg_steps;
 
+            // Steps between the falling and rising edge occurrence
+            uint opto_gap_steps;
+
             // Marks the current total amount of steps in the mode DISPENSE
             int dispenser_position;
 
@@ -34,7 +37,6 @@
             // Shows whether the motor was running / not running
             bool isRunning;
 
-            uint opto_gap_steps;
 
         // Timestamp for controlling the dispense happening at intervals.
         absolute_time_t dispense_start_time;

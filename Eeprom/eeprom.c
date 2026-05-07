@@ -64,6 +64,7 @@
 
             printf ("[STATE]: %d\n", systemVariables->program_state);
             printf ("[AVG-STEPS]: %d\n", systemVariables->avg_steps);
+            printf ("[OPTO-G-STEPS]: %d\n", systemVariables->opto_gap_steps);
             printf ("[DISP-POS]: %d\n", systemVariables->dispenser_position);
             printf("[DISP-PILLS]: %d\n", systemVariables->dispensed_pills);
             printf ("[MOVEMENT]: %d\n", systemVariables->isRunning);
@@ -140,10 +141,28 @@
             if (validate_state(data_array, MAX_TTL_READS))
             {
                 systemVariables->avg_steps = (data_array[0] << 8) | data_array[2];
-                read_dispenser_position(systemVariables, data_array, memory_address);
+                read_opto_gap_steps(systemVariables, data_array, memory_address);
             }
 
             else { printf("Validation error at [EEPROM: Average Step Size]\n"); }
+
+            return 0;
+        }
+
+        int read_opto_gap_steps (struct SystemInformation *systemVariables, uint8_t *data_array, uint8_t *memory_address)
+        {
+            memory_address[0] = EEPROM_ADDR_GAP_STEPS >> 8 & 0xFF;
+            memory_address[1] = EEPROM_ADDR_GAP_STEPS & 0xFF;
+
+            read_data(data_array, MAX_TTL_READS / 2, memory_address);
+            // printf("Opto Gap Steps [S4]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
+
+            if (validate_state(data_array, MAX_TTL_READS / 2))
+            {
+                systemVariables->opto_gap_steps = data_array[0];
+                read_dispenser_position(systemVariables, data_array, memory_address);
+            }
+            else { printf("Validation error at [EEPROM: Opto Gap Steps]\n"); }
 
             return 0;
         }
@@ -154,7 +173,7 @@
             memory_address[1] = EEPROM_ADDR_DISPENSER_POSITION & 0xFF;
 
             read_data(data_array, MAX_TTL_READS / 2, memory_address);
-             // printf("Dispenser Position [S4]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
+             // printf("Dispenser Position [S5]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
 
             if (validate_state(data_array, MAX_TTL_READS / 2))
             {
@@ -173,7 +192,7 @@
             memory_address[1] = EEPROM_ADDR_DISPENSED_PILLS & 0xFF;
 
             read_data(data_array, MAX_TTL_READS / 2, memory_address);
-            // printf("Dispensed Pills [S5]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
+            // printf("Dispensed Pills [S6]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
 
             if (validate_state(data_array, MAX_TTL_READS / 2))
             {
@@ -230,6 +249,27 @@
             if (operation_return != 6)
             {
                 printf("[ERR] Average step size save failed.\n");
+            }
+
+            return 0;
+        }
+
+        int write_opto_gap_steps (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload)
+        {
+            payload->payload_length = 4;
+            payload->data_length = 2;
+
+            payload->data_array[0] = systemVariables->opto_gap_steps;
+            payload->data_array[1] = ~payload->data_array[0];
+
+            package_data(payload->data_array, payload->data_length, payload->payload_array, EEPROM_ADDR_GAP_STEPS);
+
+            const int operation_return = save_data(payload->payload_array, payload->payload_length);
+            sleep_ms(5);
+
+            if (operation_return != 4)
+            {
+                printf("[ERR] Opto Gap Steps save failed.\n");
             }
 
             return 0;

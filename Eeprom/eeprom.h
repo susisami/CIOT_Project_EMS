@@ -35,6 +35,9 @@
             // SEARCH FOR AVG STEPS IN EEPROM
             int read_avg_steps (struct SystemInformation *systemVariables, uint8_t *data_array, uint8_t *memory_address);
 
+            // SEARCH FOR STEPS BETWEEN THE FALLING & RISING EDGE OF GP27
+            int read_opto_gap_steps (struct SystemInformation *systemVariables, uint8_t *data_array, uint8_t *memory_address);
+
             // SEARCH FOR DISPENSER POSITIONS IN EEPROM
             int read_dispenser_position (struct SystemInformation *systemVariables, uint8_t *data_array, uint8_t *memory_address);
 
@@ -48,6 +51,9 @@
 
             // Saves the average step size to the EEPROM from systemVariables struct { 4096 +- 3 }
             int write_avg_steps (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
+
+            // Saves the opto gap steps to the EEPROM
+            int write_opto_gap_steps (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
 
             // Saves the most recent dispenser position to the EEPROM from systemVariables struct { 0 - 7 }
             int write_dispenser_position (const struct SystemInformation *systemVariables, struct Eeprom_Payload *payload);
