@@ -135,13 +135,23 @@ int main() {
 
                 lora_send_event(&lora_module, EVENT_DISPENSER_EMPTY, NULL);
 
-                init_sys_variables(&systemVariables); // init variables for a fresh start
+                systemVariables.program_state = RESET;
+                break;
 
-                reset_system_variables(&systemVariables);
+
+            case RESET: // RESET //
+            
+                // Reset the systemVariables and write reset values to EEPROM
+                init_sys_variables(&systemVariables); 
+                eeprom_write_all(&systemVariables);
+
                 print_system_status(&systemVariables);
 
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
+                
+                systemVariables.program_state = PRE_CALIB;
                 break;
+
         }
 
         queue_try_remove(&button_queue, &systemVariables.button_pressed);

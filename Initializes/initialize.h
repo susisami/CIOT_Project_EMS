@@ -10,7 +10,7 @@
 /* ENUMS */
 
     // PROGRAM STATES
-    typedef enum { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE } program_state_t;
+    typedef enum { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE, RESET } program_state_t;
     
 
 /* STRUCTURES */

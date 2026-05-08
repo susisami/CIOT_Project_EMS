@@ -41,9 +41,9 @@
         #define MTR_COILS 4
         #define MTR_PHASE_AMOUNT 8
         #define DISPENSE_ROUNDS 7
-        #define DIVIDE_ROTATION 2 // the whole rotation divided by the two opto edges into two sections
+        #define STEP_COUNT_SECTIONS 2 // the whole rotation divided by the two opto edges into two sections
         #define DISPENSER_WHEEL_DIVISOR 8 // dispenser wheel slots
-        #define CALIBRATION_ROTATION_TIMES 2 // how many rotations to count the average steps from
+        #define CALIBRATION_ROTATIONS 2 // how many rotations to count the average steps from
         #define NO_PILL_BLINK_TIMES 5
 
 

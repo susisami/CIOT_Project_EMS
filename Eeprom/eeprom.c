@@ -73,7 +73,7 @@
         }
 
         // Reset eeprom system variables
-        int reset_system_variables(struct SystemInformation *systemVariables)
+        int eeprom_write_all(struct SystemInformation *systemVariables)
         {
             write_program_state(systemVariables);
             write_avg_steps(systemVariables);

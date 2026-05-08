@@ -22,7 +22,7 @@
             int print_system_status (const struct SystemInformation *systemVariables);
 
             // RESETS SYSTEM VARIABLES' ADDRESSES INSIDE EEPROM
-            int reset_system_variables(struct SystemInformation *systemVariables);
+            int eeprom_write_all(struct SystemInformation *systemVariables);
 
 
         /* READING OPERATIONS */
