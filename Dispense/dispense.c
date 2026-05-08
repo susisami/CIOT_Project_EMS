@@ -39,7 +39,7 @@
 
                 gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false);
 
-                while (queue_try_remove(&pills_queue, &dispensed)) { systemVariables->dispensed_pills++; }
+                while (queue_try_remove(&piezo_queue, &dispensed)) { systemVariables->dispensed_pills++; }
 
                 write_dispensed_pills(systemVariables);
 

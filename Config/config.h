@@ -34,7 +34,9 @@
 
 
     /* ISR RELATED */
-        #define QUEUE_SIZE 10
+        #define OPTO_QUEUE_SIZE 1
+        #define BTN_QUEUE_SIZE 1
+        #define PIEZO_QUEUE_SIZE 5
 
 
     /* MOTOR_CALIBRATION & DISPENSE RUNS */

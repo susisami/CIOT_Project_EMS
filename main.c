@@ -40,14 +40,14 @@ int main() {
 
 
     /* QUEUE INITIALIZES */
-        // OPTO FORK (GP28)
-        queue_init(&opto_queue, sizeof(bool), QUEUE_SIZE);
-
         //ROTARY ENCODER SW QUEUE (GP12)
-        queue_init(&button_queue, sizeof(bool), QUEUE_SIZE);
+        queue_init(&button_queue, sizeof(bool), BTN_QUEUE_SIZE);
+
+        // OPTO FORK (GP28)
+        queue_init(&opto_queue, sizeof(bool), OPTO_QUEUE_SIZE);
 
         // PIEZO SENSOR (GP27)
-        queue_init(&pills_queue, sizeof(bool), QUEUE_SIZE);
+        queue_init(&piezo_queue, sizeof(bool), PIEZO_QUEUE_SIZE);
 
 
     /* ISR ENABLES */

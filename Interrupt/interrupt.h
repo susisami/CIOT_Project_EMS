@@ -14,7 +14,7 @@
     extern queue_t opto_queue;
 
     //INTERRUPT QUEUE FOR PIEZO SENSOR (GP27)
-    extern queue_t pills_queue;
+    extern queue_t piezo_queue;
 
 
 /* FUNCTION DECLARATIONS */

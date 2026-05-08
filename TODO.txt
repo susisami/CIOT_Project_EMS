@@ -4,7 +4,7 @@
 
 
 # todo: 
-    1. check and think about queue size (joe said everyone tends to use queue size 10 (AI?))
+    1. add the new program state "RESET" to lora_power_loss_event() function's switch/case 
 
     2. eeprom write/read functions'
         - parameters, instead of passing the whole struct, pass just the needed variable

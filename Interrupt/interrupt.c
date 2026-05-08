@@ -15,7 +15,7 @@
     queue_t opto_queue;
 
     // QUEUE FOR PIEZO SENSOR (GP27)
-    queue_t pills_queue;
+    queue_t piezo_queue;
 
 /* FUNCTIONS */
 
@@ -44,7 +44,7 @@
             if (absolute_time_diff_us(previous_pill_drop, pill_drop) > 50 * 1000) // works with two pills & almost consistently with 3
             {
                 previous_pill_drop = pill_drop;
-                queue_try_add(&pills_queue, &value);
+                queue_try_add(&piezo_queue, &value);
             }
         }
     }

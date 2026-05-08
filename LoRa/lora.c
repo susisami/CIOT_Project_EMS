@@ -317,6 +317,9 @@ void lora_power_loss_event(lora_module_t *lora, sys_info_t *systemVariables)
                 lora_send_event(lora, EVENT_POWER_LOSS_DISPENSE_IDLE, NULL);
             }
             break;
+        
+        case RESET:
+            break; /// TODO ///
     }
 }
 
