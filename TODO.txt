@@ -11,7 +11,6 @@
         - remove the linked structure (replace for example with read_all()/write_all()) 
         - data_length automatically (make a function)
         
-    3. calib.c: test logic, comment and improve the structure
         
 # additional features: 
     1.
