@@ -3,9 +3,12 @@
 
 /*  LIBRARIES */
     #include <stdbool.h>
-
+    #include "pico/types.h"
 
 /* UTILITY FUNCTIONS */
+
+    // COUNT BYTES
+    uint count_bytes(uint value);
 
     // STRING + STDIN CHECKS
     void trim_string(char *str);

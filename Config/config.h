@@ -22,6 +22,9 @@
         #define PIEZO_SR 27
 
 
+    /* UTILS */
+        #define BYTE_MAX_VALUE 0xFF
+
     /* SYSTEM TIMEOUTS */
         #define LED_BLINK_SLOW_MS 1000
         #define LED_BLINK_FAST_MS 100

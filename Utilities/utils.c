@@ -6,7 +6,25 @@
 #include <stdbool.h>
 #include <errno.h>
 
+#include "pico/types.h"
+#include "../Config/config.h"
+
+
 /* FUNCTIONS */
+
+    // COUNT BYTES NEEDED FOR GIVEN VALUE
+    uint count_bytes(uint value)
+    {
+        uint bytes = 1;
+        while (value > BYTE_MAX_VALUE)
+        {
+            value = value >> 8;
+
+            bytes++;
+        }
+        return bytes;
+    }
+
 
     // TRIM STRING GIVEN AS PARAMETER OF SPECIFIC SYMBOLS
     void trim_string(char *str)

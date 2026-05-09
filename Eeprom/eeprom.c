@@ -3,6 +3,7 @@
 #include "../Dispense/run.h"
 #include "../Interrupt/interrupt.h"
 #include "../Initializes/initialize.h" // IWYU pragma: keep
+#include "../Utilities/utils.h"
 #include "eeprom.h"
 #include "hardware/i2c.h"
 
@@ -207,6 +208,19 @@
 
 
     /* WRITING OPERATIONS */
+
+        void write_eeprom(uint16_t address, uint value)
+        {
+            payload_control_t payload;
+            payload.data_length = count_bytes(value);
+            payload.data_length *= 2; // original and inverted values
+            payload.payload_length = payload.data_length + ADDRESS_BYTES;
+
+
+        }
+
+
+
         // Saves the program state to the EEPROM from systemVariables struct { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE }
         int write_program_state (const struct SystemInformation *systemVariables)
         {
