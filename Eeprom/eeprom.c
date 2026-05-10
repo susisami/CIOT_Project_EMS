@@ -87,11 +87,10 @@
         {
             uint8_t termination_bf[3] = {0x00, 0x00, 0};
 
-            for (uint i = 0; i < TOTAL_ADDRESSES; i++)
+            for (uint address = 0; address < TOTAL_ADDRESSES; address++)
             {
-                const uint16_t full_addr = i;
-                termination_bf[0] = (full_addr >> 8) & 0xFF;
-                termination_bf[1] = full_addr & 0xFF;
+                termination_bf[0] = (address >> 8) & 0xFF;
+                termination_bf[1] = address & 0xFF;
                 save_data(termination_bf, 3);
             }
 
@@ -214,34 +213,31 @@
 
     /* WRITING OPERATIONS */
 
-        int write_eeprom(const uint16_t address, const uint option)
+        int write_eeprom(const uint16_t address, const uint data)
         {
             payload_control_t payload;
-            payload.data_length = count_bytes(option);
+            payload.data_length = count_bytes(data);
             payload.data_length *= 2; // original and inverted values
-            payload.payload_length = payload.data_length + ADDRESS_BYTES;
-
-            if (payload.payload_length == TTL_DATA_BYTES)
+            
+            if (payload.data_length == WRITE_BYTES_MIN)
             {
-                payload.data_array[0] = (uint8_t) option;
+                payload.data_array[0] = (uint8_t) data;
                 payload.data_array[1] = ~payload.data_array[0];
             }
-
             else
             {
-                const uint16_t avg_steps_in_16_bits = option;
-
-                payload.data_array[0] = avg_steps_in_16_bits >> 8 & 0xFF;
+                payload.data_array[0] = (uint16_t) data >> 8;
                 payload.data_array[1] = ~payload.data_array[0];
-                payload.data_array[2] = avg_steps_in_16_bits & 0xFF;
+                payload.data_array[2] = (uint16_t) data & 0xFF;
                 payload.data_array[3] = ~payload.data_array[2];
             }
-
+            
             // printf("NOR (1): [%d] | INV: [%d]", payload.data_array[0], payload.data_array[1]);
             // printf("NOR (2): [%d] | INV: [%d]", payload.data_array[2], payload.data_array[3]);
-
+            
             package_data(payload.data_array, payload.data_length, payload.payload_array, address);
-
+            payload.payload_length = payload.data_length + ADDRESS_BYTES;
+            
             if (save_data(payload.payload_array, payload.payload_length) != payload.payload_length)
             {
                 printf("[ERR] Program Eeprom save failed at MEM_ADD: %X \n", address);

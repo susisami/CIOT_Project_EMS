@@ -85,6 +85,7 @@
         #define MAX_PAYLOAD_SIZE 12 // DOUBLE THE BIGGEST POSSIBLE IN THIS PROGRAM
         #define TTL_DATA_BYTES 4
         #define ADDRESS_BYTES 2
+        #define WRITE_BYTES_MIN 2
 
         // I2C INITS
         #define I2C_FREQ 100000
