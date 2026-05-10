@@ -35,8 +35,8 @@ int main() {
 
     // you can test lora messages even not connected to server
     //uncomment
-    //lora_module.state = LORA_READY;
-    //lora_module.joined = true;
+    lora_module.state = LORA_READY;
+    lora_module.joined = true;
 
 
     /* QUEUE INITIALIZES */
@@ -151,6 +151,9 @@ int main() {
                 eeprom_write_all();
 
                 print_system_status(&systemVariables);
+
+                lora_send_event(&lora_module, EVENT_RESET, NULL);
+
 
                 gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
                 

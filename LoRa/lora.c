@@ -319,7 +319,8 @@ void lora_power_loss_event(lora_module_t *lora, sys_info_t *systemVariables)
             break;
         
         case RESET:
-            break; /// TODO ///
+            lora_send_event(lora, EVENT_RESET, NULL);
+            break;
     }
 }
 
@@ -343,6 +344,7 @@ const char *lora_event_to_string(lora_event_t event) {
         case EVENT_POWER_LOSS_PRE_DISPENSE: return "PWR_LOSS_PRE_DISP";
         case EVENT_POWER_LOSS_DISPENSE_IDLE: return "PWR_LOSS_DISP_IDLE";
         case EVENT_POWER_LOSS_DISPENSE_RUNNING: return "PWR_LOSS_DISP_RUN";
+        case EVENT_RESET: return "RESET";
         default: return "UNKNOWN";
     }
 }
