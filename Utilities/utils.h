@@ -2,22 +2,22 @@
 #define UTILS_H
 
 /*  LIBRARIES */
-    #include <stdbool.h>
-    #include "pico/types.h"
+#include <stdbool.h>
+#include "pico/types.h"
 
 /* UTILITY FUNCTIONS */
 
-    // COUNT BYTES
-    uint count_bytes(uint value);
+// COUNT BYTES
+uint count_bytes(uint value);
 
-    // STRING + STDIN CHECKS
-    void trim_string(char *str);
-    void clear_stdin(const char *str);
-    void modify_string(char *str);
-    void remove_char(char *str, char c);
+// STRING + STDIN CHECKS
+void trim_string(char* str);
+void clear_stdin(const char* str);
+void modify_string(char* str);
+void remove_char(char* str, char c);
 
-    // NUMBER VALIDATION
-    bool is_integer(const char *str);
+// NUMBER VALIDATION
+bool is_integer(const char* str);
 
 
 #endif //UTILS_H

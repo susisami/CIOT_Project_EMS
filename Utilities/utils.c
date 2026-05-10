@@ -12,85 +12,88 @@
 
 /* FUNCTIONS */
 
-    // COUNT BYTES NEEDED FOR GIVEN VALUE
-    uint count_bytes(uint value)
+// COUNT BYTES NEEDED FOR GIVEN VALUE
+uint count_bytes(uint value)
+{
+    uint bytes = 1;
+    while (value > BYTE_MAX_VALUE)
     {
-        uint bytes = 1;
-        while (value > BYTE_MAX_VALUE)
-        {
-            value = value >> 8;
+        value = value >> 8;
 
-            bytes++;
-        }
-        return bytes;
+        bytes++;
     }
+    return bytes;
+}
 
 
-    // TRIM STRING GIVEN AS PARAMETER OF SPECIFIC SYMBOLS
-    void trim_string(char *str)
+// TRIM STRING GIVEN AS PARAMETER OF SPECIFIC SYMBOLS
+void trim_string(char* str)
+{
+    const size_t len = strlen(str);
+
+    for (int i = 0; i < len; i++)
     {
-        const size_t len = strlen(str);
-
-        for (int i = 0; i < len; i++)
+        if (str[i] == '\n' || str[i] == '\r')
         {
-            if (str[i] == '\n' || str[i] == '\r')
-            {
-                str[i] = '\0';
-            }
-        }
-    }
-
-
-    // CLEAR STDIN IF BUFFER IS EXCEEDED
-    void clear_stdin(const char *str)
-    {
-        if (!strchr(str, '\n'))
-        {
-            int c;
-            while ((c = getchar()) != '\n' && c != EOF) { }
+            str[i] = '\0';
         }
     }
+}
 
 
-    // MODIFIES / FORMATS STRING GIVEN AS A PARAMETER
-    void modify_string(char *str)
+// CLEAR STDIN IF BUFFER IS EXCEEDED
+void clear_stdin(const char* str)
+{
+    if (!strchr(str, '\n'))
     {
-        const size_t len = strlen(str);
-
-        for (int i = 0; i < len; i++)
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF)
         {
-            str[i] = tolower( (int) str[i]);
         }
     }
+}
 
 
-    // REMOVE SPECIFIC CHARACTER FROM STRING
-    void remove_char(char *str, char c)
+// MODIFIES / FORMATS STRING GIVEN AS A PARAMETER
+void modify_string(char* str)
+{
+    const size_t len = strlen(str);
+
+    for (int i = 0; i < len; i++)
     {
-        int j = 0;
-        for (int i = 0; str[i] != '\0'; i++)
+        str[i] = tolower((int) str[i]);
+    }
+}
+
+
+// REMOVE SPECIFIC CHARACTER FROM STRING
+void remove_char(char* str, char c)
+{
+    int j = 0;
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        if (str[i] != c)
         {
-            if (str[i] != c)
-            {
-                str[j++] = str[i];
-            }
+            str[j++] = str[i];
         }
-        str[j] = '\0';
     }
+    str[j] = '\0';
+}
 
 
-    // VALIDATES INPUT AS A VALID LONG INTEGER = TRUE, OR FALSE
-    bool is_integer(const char *str)
-    {
-        bool is_Valid = true;
+// VALIDATES INPUT AS A VALID LONG INTEGER = TRUE, OR FALSE
+bool is_integer(const char* str)
+{
+    bool is_Valid = true;
 
-        char *overflow;
+    char* overflow;
 
-        strtol(str, &overflow, 10);
+    strtol(str, &overflow, 10);
 
-        if (overflow == str || *overflow != '\0') is_Valid = false; // if there is overflow after a number has been found or if the overflow is the same as the str
+    if (overflow == str || *overflow != '\0') is_Valid = false;
+    // if there is overflow after a number has been found or if the overflow is the same as the str
 
-        if (errno == ERANGE) is_Valid = false; // checks whether the input overflows accepted length of a long integer
+    if (errno == ERANGE) is_Valid = false; // checks whether the input overflows accepted length of a long integer
 
-        return is_Valid;
-    }
+    return is_Valid;
+}

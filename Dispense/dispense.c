@@ -1,68 +1,65 @@
 /* LIBRARIES */
-    // STD LIBRARIES
-    #include <stdio.h>
+// STD LIBRARIES
+#include <stdio.h>
 
-    // CUSTOM HEADERS
-    #include "../Config/config.h"
-    #include "../Interrupt/interrupt.h"
-    #include "../Initializes/initialize.h"
-    #include "../Eeprom/eeprom.h"
-    #include "../LoRa/lora.h"
-    #include "run.h"
-
+// CUSTOM HEADERS
+#include "../Config/config.h"
+#include "../Interrupt/interrupt.h"
+#include "../Initializes/initialize.h"
+#include "../Eeprom/eeprom.h"
+#include "../LoRa/lora.h"
+#include "run.h"
 
 
 /* FUNCTIONS */
 
-    // RUNS CAROUSEL FOR ONE STEP FORWARD, CHECKS DISPENSED PILLS, HANDLES LORAWAN + EEPROM FUNCTIONALITY
-    void dispense(sys_info_t *systemVariables, lora_module_t *lora_module)
+// RUNS CAROUSEL FOR ONE STEP FORWARD, CHECKS DISPENSED PILLS, HANDLES LORAWAN + EEPROM FUNCTIONALITY
+void dispense(sys_info_t* systemVariables, lora_module_t* lora_module)
+{
+    while (systemVariables->dispenser_position < DISPENSE_ROUNDS)
     {
-        while (systemVariables->dispenser_position < DISPENSE_ROUNDS)
+        if (absolute_time_diff_us(systemVariables->dispense_start_time,
+                                  get_absolute_time()) >= DISPENSE_TIMEOUT_MS * 1000)
         {
-            if (absolute_time_diff_us(systemVariables->dispense_start_time,
-                        get_absolute_time()) >= DISPENSE_TIMEOUT_MS * 1000)
+            bool dispensed = false;
+            systemVariables->dispense_start_time = get_absolute_time();
+
+            gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
+
+            // EEPROM FUNCTIONALITY
+            write_eeprom(EEPROM_ADDR_DISPENSER_ON_MOVE, true);
+            run_motor(systemVariables->avg_steps, STEPS_IN_ROW);
+            write_eeprom(EEPROM_ADDR_DISPENSER_ON_MOVE, false);
+
+            systemVariables->dispenser_position++;
+            write_eeprom(EEPROM_ADDR_DISPENSER_POSITION, systemVariables->dispenser_position);
+
+            sleep_ms(PIEZO_TIMEOUT_MS);
+
+            gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false);
+
+            while (queue_try_remove(&piezo_queue, &dispensed)) { systemVariables->dispensed_pills++; }
+
+            write_eeprom(EEPROM_ADDR_DISPENSED_PILLS, systemVariables->dispensed_pills);
+
+            print_system_status(systemVariables);
+
+            if (!dispensed)
             {
-                bool dispensed = false;
-                systemVariables->dispense_start_time = get_absolute_time();
-
-                gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
-
-                // EEPROM FUNCTIONALITY
-                systemVariables->isRunning = true;
-                write_eeprom(EEPROM_ADDR_DISPENSER_ON_MOVE, systemVariables->isRunning);
-                run_motor(systemVariables->avg_steps, 1, 1);
-                systemVariables->isRunning = false;
-                write_eeprom(EEPROM_ADDR_DISPENSER_ON_MOVE, systemVariables->isRunning);
-
-                systemVariables->dispenser_position++;
-                write_eeprom(EEPROM_ADDR_DISPENSER_POSITION, systemVariables->dispenser_position);
-
-                sleep_ms(PIEZO_TIMEOUT_MS);
-
-                gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, false);
-
-                while (queue_try_remove(&piezo_queue, &dispensed)) { systemVariables->dispensed_pills++; }
-
-                write_eeprom(EEPROM_ADDR_DISPENSED_PILLS, systemVariables->dispensed_pills);
-
-                print_system_status(systemVariables);
-
-                if (!dispensed)
+                lora_send_event(lora_module, EVENT_PILL_NOT_DISPENSED, NULL);
+                for (int i = 0; i < NO_PILL_BLINK_TIMES * 2; i++)
                 {
-                    lora_send_event(lora_module, EVENT_PILL_NOT_DISPENSED, NULL);
-                    for (int i = 0; i < NO_PILL_BLINK_TIMES*2; i++)
-                    {
-                        gpio_put(LED_2, !gpio_get(LED_2));
-                        sleep_ms(LED_BLINK_FAST_MS);
-                    }
+                    gpio_put(LED_2, !gpio_get(LED_2));
+                    sleep_ms(LED_BLINK_FAST_MS);
                 }
-
-                else
-                {
-                    lora_send_event(lora_module, EVENT_PILL_DISPENSED, NULL);
-                }
-
-                dispensed = false;
             }
+
+            else
+            {
+                lora_send_event(lora_module, EVENT_PILL_DISPENSED, NULL);
+            }
+
+            dispensed = false;
         }
     }
+}

@@ -3,14 +3,7 @@
     1. 
 
 
-# todo: 
-    1. add the new program state "RESET" to lora_power_loss_event() function's switch/case 
-
-    2. eeprom write/read functions'
-        - parameters, instead of passing the whole struct, pass just the needed variable
-        - remove the linked structure (replace for example with read_all()/write_all()) 
-        - data_length automatically (make a function)
-        
+#
         
 # additional features: 
     1.
@@ -24,3 +17,4 @@
         -writes error messages when: system in shutdown during carousel run, ...
 
     2. optimize piezo sensor detection (currently can do 1-2 pills consistently)
+        - happens by optimizing the motor speed

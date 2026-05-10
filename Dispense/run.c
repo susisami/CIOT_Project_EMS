@@ -1,30 +1,30 @@
 /* LIBRARIES */
-    #include <stdlib.h>
-    #include "pico/stdlib.h" // IWYU pragma: keep
-    #include "pico/util/queue.h" // IWYU pragma: keep
-    #include "../Config/config.h"
+#include <stdlib.h>
+#include "pico/stdlib.h" // IWYU pragma: keep
+#include "pico/util/queue.h" // IWYU pragma: keep
+#include "../Config/config.h"
 
 
 /* ENUMS */
-    // RUN DIRECTIONS
-    typedef enum { CLOCKWISE, COUNTERCLOCKWISE } run_direction_t;
+// RUN DIRECTIONS
+typedef enum { CLOCKWISE, COUNTERCLOCKWISE } run_direction_t;
 
 
 /* FUNCTIONS */
 
-int stepper_motor_run(const uint direction, const uint max_speed)
+int stepper_motor_run(const uint direction)
 {
     static const int driving_sequence[MTR_PHASE_AMOUNT][MTR_COILS] = {
-        {1,0,0,0},
-        {1,1,0,0},
-        {0,1,0,0},
-        {0,1,1,0},
-        {0,0,1,0},
-        {0,0,1,1},
-        {0,0,0,1},
-        {1,0,0,1}
+        {1, 0, 0, 0},
+        {1, 1, 0, 0},
+        {0, 1, 0, 0},
+        {0, 1, 1, 0},
+        {0, 0, 1, 0},
+        {0, 0, 1, 1},
+        {0, 0, 0, 1},
+        {1, 0, 0, 1}
     };
-    static uint carousel_speed = 10;
+    static uint carousel_speed = CAROUSEL_MIN_SPEED;
     static uint i = 0;
 
     if (direction == CLOCKWISE)
@@ -51,26 +51,19 @@ int stepper_motor_run(const uint direction, const uint max_speed)
     {
         i = 0;
 
-        if (carousel_speed > max_speed) carousel_speed --;
+        if (carousel_speed > CAROUSEL_MAX_SPEED) carousel_speed--;
     }
 
     return 0;
 }
 
-int run_motor (const uint steps_per_rev, int times, uint max_speed)
+int run_motor(const uint steps_per_rev, int times)
 {
     uint ttl_steps = 0;
-    uint direction = CLOCKWISE;
-
-    if (times < 0)
-    {
-        times = abs(times);
-        direction = COUNTERCLOCKWISE;
-    }
 
     while (ttl_steps < times * (steps_per_rev / 8))
     {
-        stepper_motor_run(direction, max_speed);
+        stepper_motor_run(CLOCKWISE);
         ttl_steps++;
     }
 
