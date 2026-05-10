@@ -27,13 +27,15 @@
 
                 gpio_set_irq_enabled(PIEZO_SR, GPIO_IRQ_EDGE_FALL, true);
 
-                // EEPROM FUNCTIONALITY-
-                write_movement_state(systemVariables, true);
+                // EEPROM FUNCTIONALITY
+                systemVariables->isRunning = true;
+                write_eeprom(EEPROM_ADDR_DISPENSER_ON_MOVE, systemVariables->isRunning);
                 run_motor(systemVariables->avg_steps, 1, 1);
-                write_movement_state(systemVariables, false);
+                systemVariables->isRunning = false;
+                write_eeprom(EEPROM_ADDR_DISPENSER_ON_MOVE, systemVariables->isRunning);
 
                 systemVariables->dispenser_position++;
-                write_dispenser_position(systemVariables);
+                write_eeprom(EEPROM_ADDR_DISPENSER_POSITION, systemVariables->dispenser_position);
 
                 sleep_ms(PIEZO_TIMEOUT_MS);
 
@@ -41,7 +43,7 @@
 
                 while (queue_try_remove(&piezo_queue, &dispensed)) { systemVariables->dispensed_pills++; }
 
-                write_dispensed_pills(systemVariables);
+                write_eeprom(EEPROM_ADDR_DISPENSED_PILLS, systemVariables->dispensed_pills);
 
                 print_system_status(systemVariables);
 

@@ -27,10 +27,10 @@ void init_sys_variables(sys_info_t *systemVariables)
 {
     systemVariables->program_state = PRE_CALIB;
     systemVariables->avg_steps = 0;
+    systemVariables->opto_gap_steps = 0;
     systemVariables->dispenser_position = 0;
     systemVariables->dispensed_pills = 0;
     systemVariables->isRunning = false;
-    systemVariables->opto_gap_steps = 0;
 
     systemVariables->dispense_start_time = 0;
     systemVariables->button_pressed = false;

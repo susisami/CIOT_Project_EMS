@@ -41,7 +41,7 @@
 
             static absolute_time_t previous_pill_drop;
 
-            if (absolute_time_diff_us(previous_pill_drop, pill_drop) > 50 * 1000) // works with two pills & almost consistently with 3
+            if (absolute_time_diff_us(previous_pill_drop, pill_drop) > PIEZO_DROP_TIMEOUT_MS * 1000) // works with two pills & almost consistently with 3
             {
                 previous_pill_drop = pill_drop;
                 queue_try_add(&piezo_queue, &value);

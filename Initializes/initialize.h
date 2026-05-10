@@ -11,7 +11,6 @@
 
     // PROGRAM STATES
     typedef enum { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE, RESET } program_state_t;
-    
 
 /* STRUCTURES */
 
@@ -51,11 +50,11 @@
     typedef struct Eeprom_Payload
     {
         uint8_t payload_array[MAX_PAYLOAD_SIZE];
-        int payload_length;
+        uint payload_length;
 
         // Data to be stored inside the payload array
-        uint8_t data_array[MAX_TTL_READS];
-        int data_length;
+        uint8_t data_array[TTL_DATA_BYTES];
+        uint data_length;
 
     } payload_control_t;
 

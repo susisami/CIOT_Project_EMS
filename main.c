@@ -73,7 +73,7 @@ int main() {
                     gpio_put(LED_2, false);
 
                     systemVariables.program_state = CALIB;
-                    write_program_state(&systemVariables);
+                    write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
 
                 }
                 else // BLINK LED
@@ -94,15 +94,17 @@ int main() {
             case CALIB: // CALIBRATE MOTOR //
 
                 // CALIBRATION RUN
-                write_movement_state(&systemVariables, true);
+                systemVariables.isRunning = true;
+                write_eeprom(EEPROM_ADDR_DISPENSER_ON_MOVE, systemVariables.isRunning);
                 motor_calibration(&systemVariables.avg_steps, &systemVariables.opto_gap_steps);
-                write_movement_state(&systemVariables, false);
+                systemVariables.isRunning = false;
+                write_eeprom(EEPROM_ADDR_DISPENSER_ON_MOVE, systemVariables.isRunning);
 
                 // AFTER CALIBRATION RUN
                 systemVariables.program_state = PRE_DISPENSE;
-                write_program_state(&systemVariables);
-                write_avg_steps(&systemVariables);
-                write_opto_gap_steps(&systemVariables);
+                write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
+                write_eeprom(EEPROM_ADDR_AVG_STEPS, systemVariables.avg_steps);
+                write_eeprom(EEPROM_ADDR_GAP_STEPS, systemVariables.opto_gap_steps);
 
                 print_system_status(&systemVariables);
 
@@ -116,7 +118,7 @@ int main() {
                 if (systemVariables.button_pressed)
                 {
                     systemVariables.program_state = DISPENSE;
-                    write_program_state(&systemVariables);
+                    write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
 
                     gpio_put(LED_2, false);
                     systemVariables.button_pressed = false;
@@ -136,14 +138,17 @@ int main() {
                 lora_send_event(&lora_module, EVENT_DISPENSER_EMPTY, NULL);
 
                 systemVariables.program_state = RESET;
+                write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
+
                 break;
 
 
             case RESET: // RESET //
             
                 // Reset the systemVariables and write reset values to EEPROM
-                init_sys_variables(&systemVariables); 
-                eeprom_write_all(&systemVariables);
+                init_sys_variables(&systemVariables);
+
+                eeprom_write_all();
 
                 print_system_status(&systemVariables);
 

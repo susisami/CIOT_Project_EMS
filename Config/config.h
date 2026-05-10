@@ -31,7 +31,7 @@
         #define MTR_SLEEP_US 1100 // sleep between each motor step
         #define DISPENSE_TIMEOUT_MS 1000 // 30 000 ms
         #define PIEZO_TIMEOUT_MS 90 // t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
-        #define PIEZO_DROP_TIMEOUT_MS 60
+        #define PIEZO_DROP_TIMEOUT_MS 50
         #define LORA_JOIN_TIMEOUT_MS 1000 // 20 000??
         #define LORA_MSG_SEND_TIMEOUT_MS 5000
 
@@ -72,6 +72,7 @@
 
     /*I2C & EEPROM */
         // ADDRESSES
+        #define TOTAL_ADDRESSES 16
         #define EEPROM_ADDR_PROGRAM_STATE 0x0000        // 0 - 1
         #define EEPROM_ADDR_AVG_STEPS 0x0002            // 2 - 5
         #define EEPROM_ADDR_GAP_STEPS 0x0006            // 6 - 9
@@ -82,7 +83,7 @@
 
         // READS & WRITES
         #define MAX_PAYLOAD_SIZE 12 // DOUBLE THE BIGGEST POSSIBLE IN THIS PROGRAM
-        #define MAX_TTL_READS 4
+        #define TTL_DATA_BYTES 4
         #define ADDRESS_BYTES 2
 
         // I2C INITS
