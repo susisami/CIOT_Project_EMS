@@ -1,11 +1,13 @@
+/*LIBRARIES*/
+#include <stdio.h>
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "../Config/config.h"
 #include "initialize.h"
-#include <stdio.h>
 #include "hardware/i2c.h"
 #include "pico/binary_info.h" // IWYU pragma: keep
 
 
+/* INITIALIZATION FUNCTIONS */
 // EEPROM INIT
 int init_i2c_instance(void)
 {
@@ -20,7 +22,6 @@ int init_i2c_instance(void)
 
     return 0;
 }
-
 
 // SYSTEM STRUCT
 void init_sys_variables(sys_info_t* systemVariables)
@@ -46,7 +47,6 @@ void init_lora(lora_module_t* lora_module)
     }
     printf("Starting main loop\n");
 }
-
 
 // Init GPIOs
 void init_gpio_all(void)

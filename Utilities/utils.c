@@ -5,13 +5,11 @@
 #include <string.h>
 #include <stdbool.h>
 #include <errno.h>
-
 #include "pico/types.h"
 #include "../Config/config.h"
 
 
 /* FUNCTIONS */
-
 // COUNT BYTES NEEDED FOR GIVEN VALUE
 uint count_bytes(uint value)
 {

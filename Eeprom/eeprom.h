@@ -2,8 +2,6 @@
 #define EEPROM_H
 
 /* LIBRARIES */
-
-// CUSTOM LIBRARIES
 #include "../Initializes/initialize.h"
 
 
@@ -11,7 +9,7 @@
 
 /* MAIN EEPROM LOGIC FUNCTIONS */
 
-/* EEPROM OVERALL MANAGEMENT OPERATIONS */
+/* EEPROM GENERAL MANAGEMENT OPERATIONS */
 // LOAD UP SYSTEM'S SETTINGS
 int load_eeprom_settings(struct SystemInformation* systemVariables);
 
@@ -46,8 +44,7 @@ int read_dispensed_pills(uint* dispensed_pills);
 
 
 /* WRITING OPERATIONS */
-
-// Common write function for any system variable to be saved in the EEPROM
+// COMMON WRITE FUNCTION FOR ANY SYSTEM VARIABLE TO BE STORED IN EEPROM
 int write_eeprom(uint16_t address, uint data);
 
 

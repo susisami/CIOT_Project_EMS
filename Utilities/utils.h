@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include "pico/types.h"
 
-/* UTILITY FUNCTIONS */
 
+/* UTILITY FUNCTIONS */
 // COUNT BYTES
 uint count_bytes(uint value);
 

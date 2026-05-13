@@ -1,3 +1,4 @@
+/* LIBRARIES */
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "pico/util/queue.h" // IWYU pragma: keep
 #include "../Initializes/initialize.h" // IWYU pragma: keep
@@ -24,7 +25,6 @@ void get_avg_steps(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[S
 
 
 /* FUNCTIONS */
-
 // MAIN CALIBRATION FUNCTION
 /*
     1.  count average steps in two parts (opto gap  /  the rest)

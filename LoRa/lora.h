@@ -38,7 +38,6 @@ typedef enum
 
 
 /* STRUCTURES */
-
 // LORA MODULE STRUCTURE
 typedef struct
 {
@@ -48,8 +47,8 @@ typedef struct
     char deveui[32];
 } lora_module_t;
 
-/* FUNCTION DECLARATIONS */
 
+/* FUNCTION DECLARATIONS */
 // Initialize LoRa module (UART and structure)
 void lora_init(lora_module_t* module);
 

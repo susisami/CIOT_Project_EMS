@@ -28,11 +28,11 @@
 /* SYSTEM TIMEOUTS */
 #define LED_BLINK_SLOW_MS 1000
 #define LED_BLINK_FAST_MS 100
-#define MTR_SLEEP_US 1100 // sleep between each motor step
-#define DISPENSE_TIMEOUT_MS 1000 // 30 000 ms
-#define PIEZO_TIMEOUT_MS 90 // t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
-#define PIEZO_DROP_TIMEOUT_MS 50
-#define LORA_JOIN_TIMEOUT_MS 1000 // 20 000??
+#define MTR_SLEEP_US 1100               // sleep between each motor step
+#define DISPENSE_TIMEOUT_MS 5000        // 30 000 ms
+#define PIEZO_TIMEOUT_MS 90             // t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
+#define PIEZO_DROP_TIMEOUT_MS 60        // after a pill has hit the sensor, timeout for next touch to be registered
+#define LORA_JOIN_TIMEOUT_MS 1000       // 20 000??
 #define LORA_MSG_SEND_TIMEOUT_MS 5000
 
 
@@ -47,11 +47,11 @@
 #define MTR_PHASE_AMOUNT 8
 #define DISPENSE_ROUNDS 7
 #define STEPS_IN_ROW 1
+#define CAROUSEL_DEF_SPEED 8
 #define CAROUSEL_MAX_SPEED 1
-#define CAROUSEL_MIN_SPEED 10
-#define STEP_COUNT_SECTIONS 2 // the whole rotation divided by the two opto edges into two sections
-#define DISPENSER_WHEEL_DIVISOR 8 // dispenser wheel slots
-#define CALIBRATION_ROTATIONS 2 // how many rotations to count the average steps from
+#define STEP_COUNT_SECTIONS 2       // the whole rotation divided by the two opto edges into two sections
+#define DISPENSER_WHEEL_DIVISOR 8   // dispenser wheel slots
+#define CALIBRATION_ROTATIONS 2     // how many rotations to count the average steps from
 #define NO_PILL_BLINK_TIMES 5
 
 
@@ -75,7 +75,7 @@
 
 /*I2C & EEPROM */
 // ADDRESSES
-#define TOTAL_ADDRESSES 16
+#define TOTAL_ADDRESSES 16                      // TOTAL RESERVED ADDRESSES FOR NORMAL & INVERSIONS
 #define EEPROM_ADDR_PROGRAM_STATE 0x0000        // 0 - 1
 #define EEPROM_ADDR_AVG_STEPS 0x0002            // 2 - 5
 #define EEPROM_ADDR_GAP_STEPS 0x0006            // 6 - 9
@@ -85,9 +85,9 @@
 
 // READS & WRITES
 #define MAX_PAYLOAD_SIZE 12 // DOUBLE THE BIGGEST POSSIBLE IN THIS PROGRAM
-#define TTL_DATA_BYTES 4
-#define ADDRESS_BYTES 2
-#define WRITE_BYTES_MIN 2
+#define MAX_READ_BYTES 4    // MAX BYTES THAT ARE READ FROM THE EEPROM (2 NORMAL + 2 INVERTED)
+#define ADDRESS_BYTES 2     // HIGH BYTE + LOW BYTE
+#define WRITE_BYTES_MIN 2   // MINIMUM BYTES THAT ARE WRITTEN IN EEPROM (1 NORMAL & 1 INVERTED)
 
 // I2C INITS
 #define I2C_FREQ 100000

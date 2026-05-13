@@ -8,12 +8,11 @@
 
 
 /* ENUMS */
-
 // PROGRAM STATES
 typedef enum { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE, RESET } program_state_t;
 
-/* STRUCTURES */
 
+/* STRUCTURES */
 // SYSTEM STRUCTURE
 typedef struct SystemInformation
 {
@@ -44,7 +43,6 @@ typedef struct SystemInformation
     bool button_pressed;
 } sys_info_t;
 
-
 // EEPROM PAYLOAD STRUCTURE ( MADE FOR PROGRAM SCALABILITY )
 typedef struct Eeprom_Payload
 {
@@ -52,7 +50,7 @@ typedef struct Eeprom_Payload
     uint payload_length;
 
     // Data to be stored inside the payload array
-    uint8_t data_array[TTL_DATA_BYTES];
+    uint8_t data_array[MAX_READ_BYTES];
     uint data_length;
 } payload_control_t;
 

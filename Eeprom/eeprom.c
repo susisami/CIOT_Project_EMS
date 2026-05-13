@@ -1,11 +1,12 @@
+/*LIBRARIES*/
 #include <stdio.h>
-
 #include "../Dispense/run.h"
 #include "../Interrupt/interrupt.h"
 #include "../Initializes/initialize.h" // IWYU pragma: keep
 #include "../Utilities/utils.h"
 #include "eeprom.h"
 #include "hardware/i2c.h"
+
 
 /* FUNCTIONS */
 
@@ -44,22 +45,23 @@ int load_eeprom_settings(struct SystemInformation* systemVariables)
 int recover_prev_position(const struct SystemInformation* systemVariables)
 {
     bool edgeDetected;
+    uint carousel_speed = CAROUSEL_DEF_SPEED;
 
     gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL, true);
 
     while (!queue_try_remove(&opto_queue, &edgeDetected))
     {
-        stepper_motor_run(COUNTERCLOCKWISE);
+        stepper_motor_run(COUNTERCLOCKWISE, &carousel_speed,true);
     }
 
     gpio_set_irq_enabled(OPTO_FORK, GPIO_IRQ_EDGE_FALL, false);
 
     for (int i = 0; i < systemVariables->opto_gap_steps / 2; i++)
     {
-        stepper_motor_run(COUNTERCLOCKWISE);
+        stepper_motor_run(COUNTERCLOCKWISE,  &carousel_speed,true);
     }
 
-    run_motor(systemVariables->avg_steps, systemVariables->dispenser_position);
+    run_motor(systemVariables->avg_steps, systemVariables->dispenser_position, true);
 
     return 0;
 }
@@ -103,38 +105,36 @@ int read_program_state(program_state_t* program_state)
     const uint8_t memory_address[ADDRESS_BYTES] = {
         EEPROM_ADDR_PROGRAM_STATE >> 8 & 0xFF, EEPROM_ADDR_PROGRAM_STATE & 0xFF
     };
-    uint8_t data_array[TTL_DATA_BYTES];
+    uint8_t data_array[MAX_READ_BYTES];
 
-    read_data(data_array, TTL_DATA_BYTES / 2, memory_address);
+    read_data(data_array, MAX_READ_BYTES / 2, memory_address);
 
     // printf("PROGRAM STATE [S1]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
 
-    if (validate_state(data_array, TTL_DATA_BYTES / 2))
+    if (validate_state(data_array, MAX_READ_BYTES / 2))
     {
         *program_state = (program_state_t) data_array[0];
     }
 
-    else { printf("Validation error at [EEPROM: Program State]\n"); }
+    else { printf("Previous setting at [EEPROM: Program State]\n"); }
 
     return 0;
 }
 
 int read_movement(bool* isRunning)
 {
-    const uint8_t memory_address[ADDRESS_BYTES] = {
-        EEPROM_ADDR_DISPENSER_ON_MOVE >> 8 & 0xFF, EEPROM_ADDR_DISPENSER_ON_MOVE & 0xFF
-    };
-    uint8_t data_array[TTL_DATA_BYTES];
+    const uint8_t memory_address[ADDRESS_BYTES] = {EEPROM_ADDR_DISPENSER_ON_MOVE >> 8 & 0xFF, EEPROM_ADDR_DISPENSER_ON_MOVE & 0xFF};
+    uint8_t data_array[MAX_READ_BYTES];
 
-    read_data(data_array, TTL_DATA_BYTES / 2, memory_address);
+    read_data(data_array, MAX_READ_BYTES / 2, memory_address);
     // printf("Carousel Movement Detection [S2]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
 
-    if (validate_state(data_array, TTL_DATA_BYTES / 2))
+    if (validate_state(data_array, MAX_READ_BYTES / 2))
     {
         *isRunning = data_array[0];
     }
 
-    else { printf("Validation not successful at [EEPROM: Carousel Movement Detection]\n"); }
+    else { printf("Previous setting at [EEPROM: Carousel Movement Detection]\n"); }
 
     return 0;
 }
@@ -142,18 +142,18 @@ int read_movement(bool* isRunning)
 int read_avg_steps(uint* avg_steps)
 {
     const uint8_t memory_address[ADDRESS_BYTES] = {EEPROM_ADDR_AVG_STEPS >> 8 & 0xFF, EEPROM_ADDR_AVG_STEPS & 0xFF};
-    uint8_t data_array[TTL_DATA_BYTES];
+    uint8_t data_array[MAX_READ_BYTES];
 
-    read_data(data_array, TTL_DATA_BYTES, memory_address);
+    read_data(data_array, MAX_READ_BYTES, memory_address);
     // printf("Average Steps (1 / 2) [S3]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
     // printf("Average Steps (2 / 2) [S3]: (NORMAL) %d | (INVERTED) %d\n", data_array[2], data_array[3]);
 
-    if (validate_state(data_array, TTL_DATA_BYTES))
+    if (validate_state(data_array, MAX_READ_BYTES))
     {
         *avg_steps = (data_array[0] << 8) | data_array[2];
     }
 
-    else { printf("Validation not successful at [EEPROM: Average Step Size]\n"); }
+    else { printf("Previous setting at [EEPROM: Average Step Size]\n"); }
 
     return 0;
 }
@@ -161,18 +161,18 @@ int read_avg_steps(uint* avg_steps)
 int read_opto_gap_steps(uint* opto_gap_steps)
 {
     const uint8_t memory_address[ADDRESS_BYTES] = {EEPROM_ADDR_GAP_STEPS >> 8 & 0xFF, EEPROM_ADDR_GAP_STEPS & 0xFF};
-    uint8_t data_array[TTL_DATA_BYTES];
+    uint8_t data_array[MAX_READ_BYTES];
 
-    read_data(data_array, TTL_DATA_BYTES, memory_address);
+    read_data(data_array, MAX_READ_BYTES, memory_address);
 
     // printf("Opto Gap Steps (1 / 2) [S4]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
     // printf("Opto Gap Steps (2 / 2) [S4]: (NORMAL) %d | (INVERTED) %d\n", data_array[2], data_array[3]);
 
-    if (validate_state(data_array, TTL_DATA_BYTES))
+    if (validate_state(data_array, MAX_READ_BYTES))
     {
         *opto_gap_steps = (data_array[0] << 8) | data_array[2];
     }
-    else { printf("Validation not successful at [EEPROM: Opto Gap Steps]\n"); }
+    else { printf("Previous setting at [EEPROM: Opto Gap Steps]\n"); }
 
     return 0;
 }
@@ -182,16 +182,16 @@ int read_dispenser_position(uint* dispenser_position)
     const uint8_t memory_address[ADDRESS_BYTES] = {
         EEPROM_ADDR_DISPENSER_POSITION >> 8 & 0xFF, EEPROM_ADDR_DISPENSER_POSITION & 0xFF
     };
-    uint8_t data_array[TTL_DATA_BYTES];
+    uint8_t data_array[MAX_READ_BYTES];
 
-    read_data(data_array, TTL_DATA_BYTES / 2, memory_address);
+    read_data(data_array, MAX_READ_BYTES / 2, memory_address);
     // printf("Dispenser Position [S5]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
 
-    if (validate_state(data_array, TTL_DATA_BYTES / 2))
+    if (validate_state(data_array, MAX_READ_BYTES / 2))
     {
         *dispenser_position = data_array[0];
     }
-    else { printf("Validation not successful at [EEPROM: Dispenser Position]\n"); }
+    else { printf("Previous setting at [EEPROM: Dispenser Position]\n"); }
 
     return 0;
 }
@@ -202,16 +202,16 @@ int read_dispensed_pills(uint* dispensed_pills)
     const uint8_t memory_address[ADDRESS_BYTES] = {
         EEPROM_ADDR_DISPENSED_PILLS >> 8 & 0xFF, EEPROM_ADDR_DISPENSED_PILLS & 0xFF
     };
-    uint8_t data_array[TTL_DATA_BYTES];
+    uint8_t data_array[MAX_READ_BYTES];
 
-    read_data(data_array, TTL_DATA_BYTES / 2, memory_address);
+    read_data(data_array, MAX_READ_BYTES / 2, memory_address);
     // printf("Dispensed Pills [S6]: (NORMAL) %d | (INVERTED) %d\n", data_array[0], data_array[1]);
 
-    if (validate_state(data_array, TTL_DATA_BYTES / 2))
+    if (validate_state(data_array, MAX_READ_BYTES / 2))
     {
         *dispensed_pills = data_array[0];
     }
-    else { printf("Validation not successful at [EEPROM: Dispensed Pills]\n"); }
+    else { printf("Previous setting at [EEPROM: Dispensed Pills]\n"); }
 
     return 0;
 }

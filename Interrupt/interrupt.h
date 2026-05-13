@@ -6,7 +6,6 @@
 
 
 /* QUEUE DECLARATIONS */
-
 // INTERRUPT QUEUE FOR ROT SW (GP12)
 extern queue_t button_queue;
 
@@ -18,7 +17,6 @@ extern queue_t piezo_queue;
 
 
 /* FUNCTION DECLARATIONS */
-
 // INTERRUPT CALLBACK FOR ROT SW & OPTO FORK
 void interrupt_callback(uint gpio, uint32_t events);
 

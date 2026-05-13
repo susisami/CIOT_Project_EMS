@@ -1,10 +1,6 @@
 /* LIBRARIES */
-// STD HEADER FILES
-#include <stdio.h>
 #include <stdbool.h>
 #include <sys/unistd.h>
-
-// OWN HEADER FILES
 #include "hardware/pwm.h" // IWYU pragma: keep
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "pico/util/queue.h"
@@ -147,13 +143,15 @@ int main()
 
             eeprom_write_all();
 
-            print_system_status(&systemVariables);
 
             lora_send_event(&lora_module, EVENT_RESET, NULL);
 
             gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
 
             systemVariables.program_state = PRE_CALIB;
+
+            print_system_status(&systemVariables);
+
             break;
         }
 

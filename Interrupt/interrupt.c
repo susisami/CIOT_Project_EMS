@@ -1,13 +1,10 @@
 /* LIBRARIES */
-
-// CUSTOM HEADERS
 #include "pico/stdlib.h" // IWYU pragma: keep
 #include "../Config/config.h"
 #include "pico/util/queue.h"
 
 
 /* QUEUES */
-
 // QUEUE FOR ROT SW (GP12)
 queue_t button_queue;
 
@@ -17,8 +14,8 @@ queue_t opto_queue;
 // QUEUE FOR PIEZO SENSOR (GP27)
 queue_t piezo_queue;
 
-/* FUNCTIONS */
 
+/* FUNCTIONS */
 // IRS FOR ROT SW (GP12), OPTO FORK (GP28) & PIEZO SENSOR (GP27)
 void interrupt_callback(uint gpio, uint32_t events)
 {

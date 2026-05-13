@@ -1,8 +1,5 @@
 /* LIBRARIES */
-// STD LIBRARIES
 #include <stdio.h>
-
-// CUSTOM HEADERS
 #include "../Config/config.h"
 #include "../Interrupt/interrupt.h"
 #include "../Initializes/initialize.h"
@@ -12,8 +9,7 @@
 
 
 /* FUNCTIONS */
-
-// RUNS CAROUSEL FOR ONE STEP FORWARD, CHECKS DISPENSED PILLS, HANDLES LORAWAN + EEPROM FUNCTIONALITY
+// RUNS CAROUSEL ONE STEP FORWARD, CHECKS DISPENSED PILLS, HANDLES LORAWAN + EEPROM FUNCTIONALITY
 void dispense(sys_info_t* systemVariables, lora_module_t* lora_module)
 {
     while (systemVariables->dispenser_position < DISPENSE_ROUNDS)
@@ -28,7 +24,7 @@ void dispense(sys_info_t* systemVariables, lora_module_t* lora_module)
 
             // EEPROM FUNCTIONALITY
             write_eeprom(EEPROM_ADDR_DISPENSER_ON_MOVE, true);
-            run_motor(systemVariables->avg_steps, STEPS_IN_ROW);
+            run_motor(systemVariables->avg_steps, STEPS_IN_ROW, false);
             write_eeprom(EEPROM_ADDR_DISPENSER_ON_MOVE, false);
 
             systemVariables->dispenser_position++;

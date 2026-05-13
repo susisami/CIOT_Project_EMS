@@ -1,3 +1,4 @@
+/* LIBRARIES */
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -8,6 +9,7 @@
 #include "../Config/config.h"
 
 
+/* FUNCTIONS */
 //Forget everything the module said
 static void uart_flush(void)
 {

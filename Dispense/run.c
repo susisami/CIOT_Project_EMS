@@ -12,7 +12,7 @@ typedef enum { CLOCKWISE, COUNTERCLOCKWISE } run_direction_t;
 
 /* FUNCTIONS */
 
-int stepper_motor_run(const uint direction)
+int stepper_motor_run(const uint direction, uint *carousel_speed, const bool recalibration)
 {
     static const int driving_sequence[MTR_PHASE_AMOUNT][MTR_COILS] = {
         {1, 0, 0, 0},
@@ -24,7 +24,6 @@ int stepper_motor_run(const uint direction)
         {0, 0, 0, 1},
         {1, 0, 0, 1}
     };
-    static uint carousel_speed = CAROUSEL_MIN_SPEED;
     static uint i = 0;
 
     if (direction == CLOCKWISE)
@@ -43,7 +42,7 @@ int stepper_motor_run(const uint direction)
         gpio_put(MTR_IN4, driving_sequence[i][0]);
     }
 
-    sleep_ms(carousel_speed);
+    sleep_ms(*carousel_speed);
 
     i++;
 
@@ -51,19 +50,20 @@ int stepper_motor_run(const uint direction)
     {
         i = 0;
 
-        if (carousel_speed > CAROUSEL_MAX_SPEED) carousel_speed--;
+        if (*carousel_speed > CAROUSEL_MAX_SPEED && recalibration) { (*carousel_speed)--; }
     }
 
     return 0;
 }
 
-int run_motor(const uint steps_per_rev, int times)
+int run_motor(const uint steps_per_rev, const int times, const bool recalibration)
 {
     uint ttl_steps = 0;
+    uint carousel_speed = CAROUSEL_DEF_SPEED;
 
     while (ttl_steps < times * (steps_per_rev / 8))
     {
-        stepper_motor_run(CLOCKWISE);
+        stepper_motor_run(CLOCKWISE, &carousel_speed, recalibration);
         ttl_steps++;
     }
 
