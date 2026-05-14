@@ -83,22 +83,22 @@ void motor_calibration(uint* steps_per_rotation, uint* opto_gap_steps)
 // GET AVERAGE AMOUNT OF STEPS PER ROTATION
 /*
     Divide full rotation into two segments/variables:
-        "count_first_section"     (steps between    odd and even  -numbered opto edges)
-        "count_second_section"    (steps between   even and odd   -numbered opto edges)
+        "odd_to_even_steps"     (steps between    odd and even  -numbered opto edges)
+        "even_to_odd_steps"     (steps between   even and odd   -numbered opto edges)
 
     Program flow:
         1. Rotate until the first opto_edge
-        2. Count steps into the  "count_first_section"  until the second edge
-        3. Between 2nd and 3rd edges count the steps into the "count_second_section"
-        4. 3rd -> 4th edges count to  "count_first_section"  again
-        5. Keep counting until enough full_rotations counted
+        2. Count steps into the  "odd_to_even_steps"  until the second edge
+        3. Between 2nd and 3rd edges count the steps into the "even_to_odd_steps"
+        4. 3rd -> 4th edges count to  "odd_to_even_steps"  again
+        5. Keep counting until enough full rotations counted
         6. Count averages of each step count into results[]
 */
 void get_avg_steps(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[STEP_COUNT_SECTIONS])
 {
-    int count_first_section = 0; // steps between    odd and even  -numbered opto edges
-    int count_second_section = 0; // steps between   even and odd   -numbered opto edges
-    int full_rotations = 0; // count the counted rotations
+    int odd_to_even_steps = 0; // steps between    odd and even  -numbered opto edges
+    int even_to_odd_steps = 0; // steps between   even and odd   -numbered opto edges
+    int counted_full_rotations = 0; // count the counted rotations
     bool junk;
     calib_state_t state = WAIT_FIRST_EDGE;
 
@@ -122,7 +122,7 @@ void get_avg_steps(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[S
 
             // Count steps between odd-numbered and even-numbered edges
             case COUNT_FIRST_SECTION:
-                count_first_section++;
+                odd_to_even_steps++;
 
                 if (opto_edge)
                 {
@@ -133,15 +133,15 @@ void get_avg_steps(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[S
                 break;
 
             // Count steps between even-numbered and odd-numbered edges
-            //      calibrate given number of full_rotations
+            //      calibrate given number of counted_full_rotations
             case COUNT_SECOND_SECTION:
-                count_second_section++;
+                even_to_odd_steps++;
 
                 if (opto_edge)
                 {
-                    full_rotations++;
+                    counted_full_rotations++;
 
-                    if (full_rotations < CALIBRATION_ROTATIONS) state = COUNT_FIRST_SECTION;
+                    if (counted_full_rotations < CALIBRATION_ROTATIONS) state = COUNT_FIRST_SECTION;
                     else state = CALIBRATED;
                 }
 
@@ -158,8 +158,8 @@ void get_avg_steps(int mtr_steps_arr[MTR_PHASE_AMOUNT][MTR_COILS], int results[S
         }
     }
 
-    results[0] = (float)count_first_section / CALIBRATION_ROTATIONS;
-    results[1] = (float)count_second_section / CALIBRATION_ROTATIONS;
+    results[0] = (float)odd_to_even_steps / CALIBRATION_ROTATIONS;
+    results[1] = (float)even_to_odd_steps / CALIBRATION_ROTATIONS;
 }
 
 

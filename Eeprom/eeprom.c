@@ -319,7 +319,7 @@ void eeprom_ack_polling_with_timeout(uint timeout_us)
 
         if (result == read_bytes) 
         {
-            printf("EEPROM_ACK_POLL_TIME: %d\n", time_us_32()-start_time_us);
+            // printf("EEPROM_ACK_POLL_TIME_US: %d\n", time_us_32()-start_time_us);
             return;
         }
     }
