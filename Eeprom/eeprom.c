@@ -254,11 +254,11 @@ int write_eeprom(const uint16_t address, const uint data)
 
 
 /* GENERAL READING & SAVING FUNCTIONS */
-// SAVE DATA TO EEPROM (BYTE PER MEMORY ADDRESS (0xXX) IN 0x50 DEVICE)
+// SAVE DATA TO EEPROM (BYTE PER MEMORY ADDRESS (0xXX) IN I2C_ADDR_EEPROM DEVICE)
 uint save_data(const uint8_t* payload, const uint len)
 {
-    const uint bytes_written = i2c_write_blocking(i2c0, 0x50, payload, len, false);
-    sleep_ms(5);
+    const uint bytes_written = i2c_write_blocking(I2C_PORT, I2C_ADDR_EEPROM, payload, len, false);
+    eeprom_ack_polling_with_timeout(EEPROM_ACK_TIMEOUT_US);
 
     return bytes_written;
 }
@@ -268,11 +268,10 @@ uint save_data(const uint8_t* payload, const uint len)
 uint read_data(uint8_t* data, const uint len, const uint8_t* addr)
 {
     // SETS THE POINTER INSIDE THE EEPROM TO 16-BIT ADDRESS 0xFFFA (6th last)
-    i2c_write_blocking(i2c0, 0x50, addr, 2, true);
-    sleep_ms(5);
+    i2c_write_blocking(I2C_PORT, I2C_ADDR_EEPROM, addr, 2, true);
 
     // READS FROM THE MEM ADDRESS POINTED AT
-    return i2c_read_blocking(i2c0, 0x50, data, len, false);
+    return i2c_read_blocking(I2C_PORT, I2C_ADDR_EEPROM, data, len, false);
 }
 
 
@@ -304,4 +303,24 @@ uint package_data(const uint8_t* data_array, const uint data_array_length, uint8
     }
 
     return 0;
+}
+
+
+void eeprom_ack_polling_with_timeout(uint timeout_us)
+{
+    uint8_t dummy = 0;
+    int read_bytes = 1;
+    uint32_t start_time_us = time_us_32();
+
+    while ((time_us_32() - start_time_us) < timeout_us)
+    {
+        int result = i2c_read_timeout_us(I2C_PORT, I2C_ADDR_EEPROM, 
+            &dummy, read_bytes, false, I2C_POLLING_TIMEOUT_US);
+
+        if (result == read_bytes) 
+        {
+            printf("EEPROM_ACK_POLL_TIME: %d\n", time_us_32()-start_time_us);
+            return;
+        }
+    }
 }

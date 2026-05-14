@@ -63,5 +63,8 @@ bool validate_state(const uint8_t* array, int array_length);
 // FUNCTION TO TIE ALL GIVEN DATA (INVERTED & NORMAL) TOGETHER INTO A SINGLE TRANSMISSION BUFFER / PAYLOAD PACKAGE
 uint package_data(const uint8_t* data_array, uint data_array_length, uint8_t* payload_array, uint16_t memory_address);
 
+// POLL EEPROM 
+void eeprom_ack_polling_with_timeout(uint timeout_us);
+
 
 #endif //EEPROM_H
