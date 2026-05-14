@@ -143,7 +143,6 @@ int main()
 
             eeprom_write_all();
 
-
             lora_send_event(&lora_module, EVENT_RESET, NULL);
 
             gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);

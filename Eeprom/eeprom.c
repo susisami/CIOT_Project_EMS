@@ -116,7 +116,7 @@ int read_program_state(program_state_t* program_state)
         *program_state = (program_state_t) data_array[0];
     }
 
-    else { printf("Previous setting at [EEPROM: Program State]\n"); }
+    else { printf("Previous setting not found at [EEPROM: Program State]\n"); }
 
     return 0;
 }
@@ -134,7 +134,7 @@ int read_movement(bool* isRunning)
         *isRunning = data_array[0];
     }
 
-    else { printf("Previous setting at [EEPROM: Carousel Movement Detection]\n"); }
+    else { printf("Previous setting not found at [EEPROM: Carousel Movement Detection]\n"); }
 
     return 0;
 }
@@ -153,7 +153,7 @@ int read_avg_steps(uint* avg_steps)
         *avg_steps = (data_array[0] << 8) | data_array[2];
     }
 
-    else { printf("Previous setting at [EEPROM: Average Step Size]\n"); }
+    else { printf("Previous setting not found at [EEPROM: Average Step Size]\n"); }
 
     return 0;
 }
@@ -172,7 +172,7 @@ int read_opto_gap_steps(uint* opto_gap_steps)
     {
         *opto_gap_steps = (data_array[0] << 8) | data_array[2];
     }
-    else { printf("Previous setting at [EEPROM: Opto Gap Steps]\n"); }
+    else { printf("Previous setting not found at [EEPROM: Opto Gap Steps]\n"); }
 
     return 0;
 }
@@ -191,7 +191,7 @@ int read_dispenser_position(uint* dispenser_position)
     {
         *dispenser_position = data_array[0];
     }
-    else { printf("Previous setting at [EEPROM: Dispenser Position]\n"); }
+    else { printf("Previous setting not found at [EEPROM: Dispenser Position]\n"); }
 
     return 0;
 }
@@ -211,7 +211,7 @@ int read_dispensed_pills(uint* dispensed_pills)
     {
         *dispensed_pills = data_array[0];
     }
-    else { printf("Previous setting at [EEPROM: Dispensed Pills]\n"); }
+    else { printf("Previous setting not found at [EEPROM: Dispensed Pills]\n"); }
 
     return 0;
 }
