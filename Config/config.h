@@ -54,7 +54,7 @@
 #define CAROUSEL_MAX_SPEED 1
 #define STEP_COUNT_SECTIONS 2       // the whole rotation divided by the two opto edges into two sections
 #define DISPENSER_WHEEL_DIVISOR 8   // dispenser wheel slots
-#define CALIBRATION_ROTATIONS 2     // how many rotations to count the average steps from
+#define CALIBRATION_ROTATIONS 3     // 3 rotations to count the average steps
 #define NO_PILL_BLINK_TIMES 5
 
 
