@@ -262,24 +262,11 @@ bool lora_send_event(lora_module_t *module, lora_event_t event, sys_info_t *syst
     switch (event) {
         case EVENT_PILL_DISPENSED:
         case EVENT_PILL_NOT_DISPENSED: {
-            static int previous_pill_count = 0;
-
-            int current_total = systemVariables->dispensed_pills;
-            int pills_this_dispenser = current_total - previous_pill_count;
-
-            // prevent negative values
-            if (pills_this_dispenser < 0) {
-                pills_this_dispenser = 0;
-            }
 
             snprintf(msg, sizeof(msg),
-                     "%s | POS:%d | PILLS:%d",
+                     "%s | POS:%d |",
                      lora_event_to_string(event),
-                     systemVariables->dispenser_position,
-                     pills_this_dispenser);
-
-            previous_pill_count = current_total;
-
+                     systemVariables->dispenser_position);
             break;
         }
 
