@@ -11,24 +11,19 @@
 
 /* FUNCTIONS */
 //Forget everything the module said
-static void uart_flush(void)
-{
-    while (uart_is_readable(LORA_UART_ID))
-    {
+static void uart_flush(void) {
+    while (uart_is_readable(LORA_UART_ID)) {
         uart_getc(LORA_UART_ID);
     }
 }
 
 // get Devui for your lora grove module
-void lora_process_deveui(char* input, char* output)
-{
+void lora_process_deveui(char *input, char *output) {
     int j = 0;
 
-    for (int i = 0; input[i] != '\0'; i++)
-    {
-        if (input[i] != ':')
-        {
-            output[j++] = (char)tolower((unsigned char)input[i]);
+    for (int i = 0; input[i] != '\0'; i++) {
+        if (input[i] != ':') {
+            output[j++] = (char) tolower((unsigned char)input[i]);
         }
     }
 
@@ -36,8 +31,7 @@ void lora_process_deveui(char* input, char* output)
 }
 
 // Validate single response line
-static bool lora_check_response(const char* command, const char* response)
-{
+static bool lora_check_response(const char *command, const char *response) {
     if (!response || response[0] == '\0')
         return false;
 
@@ -73,27 +67,21 @@ static bool lora_check_response(const char* command, const char* response)
 
 
 //read uart
-bool lora_uart_read_line(char* buffer, int max_len, int timeout_ms)
-{
+bool lora_uart_read_line(char *buffer, int max_len, int timeout_ms) {
     int pos = 0;
     absolute_time_t deadline = make_timeout_time_ms(timeout_ms);
 
-    while (absolute_time_diff_us(get_absolute_time(), deadline) > 0)
-    {
-        if (uart_is_readable(LORA_UART_ID))
-        {
+    while (absolute_time_diff_us(get_absolute_time(), deadline) > 0) {
+        if (uart_is_readable(LORA_UART_ID)) {
             char c = uart_getc(LORA_UART_ID);
 
-            if (c != '\r')
-            {
-                if (c == '\n')
-                {
+            if (c != '\r') {
+                if (c == '\n') {
                     buffer[pos] = '\0';
                     return true;
                 }
 
-                if (pos < max_len - 1)
-                {
+                if (pos < max_len - 1) {
                     buffer[pos++] = c;
                 }
             }
@@ -104,18 +92,16 @@ bool lora_uart_read_line(char* buffer, int max_len, int timeout_ms)
 }
 
 //send command to lora module
-bool lora_send_command(const char* command, char* response, int response_len, int timeout_ms)
-{
+bool lora_send_command(const char *command, char *response, int response_len, int timeout_ms) {
     memset(response, 0, response_len);
     uart_flush();
 
     printf("[LoRa TX] %s\n", command);
 
-    uart_write_blocking(LORA_UART_ID, (const uint8_t*)command, strlen(command));
-    uart_write_blocking(LORA_UART_ID, (const uint8_t*)"\r\n", strlen("\r\n"));
+    uart_write_blocking(LORA_UART_ID, (const uint8_t *) command, strlen(command));
+    uart_write_blocking(LORA_UART_ID, (const uint8_t *) "\r\n", strlen("\r\n"));
 
-    if (!lora_uart_read_line(response, response_len, timeout_ms))
-    {
+    if (!lora_uart_read_line(response, response_len, timeout_ms)) {
         printf("[LoRa RX] <timeout>\n");
         return false;
     }
@@ -126,8 +112,7 @@ bool lora_send_command(const char* command, char* response, int response_len, in
 }
 
 
-void lora_init(lora_module_t* module)
-{
+void lora_init(lora_module_t *module) {
     uart_init(LORA_UART_ID, LORA_BAUD_RATE);
     gpio_set_function(LORA_TX_PIN, GPIO_FUNC_UART);
     gpio_set_function(LORA_RX_PIN, GPIO_FUNC_UART);
@@ -142,16 +127,13 @@ void lora_init(lora_module_t* module)
 }
 
 
-//
+//po
 
-static bool lora_step_join(char* buf)
-{
+static bool lora_step_join(char *buf) {
     absolute_time_t deadline = make_timeout_time_ms(LORA_JOIN_TIMEOUT_MS);
 
-    while (absolute_time_diff_us(get_absolute_time(), deadline) > 0)
-    {
-        if (lora_uart_read_line(buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS))
-        {
+    while (absolute_time_diff_us(get_absolute_time(), deadline) > 0) {
+        if (lora_uart_read_line(buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS)) {
             printf("[LoRa RX] %s\n", buf);
 
             if (strstr(buf, "+JOIN: Done"))
@@ -168,8 +150,7 @@ static bool lora_step_join(char* buf)
     return false;
 }
 
-bool lora_connect(lora_module_t* module)
-{
+bool lora_connect(lora_module_t *module) {
     char buf[LORA_BUFFER_SIZE]; //for rx
     char cmd[LORA_COMMAND_SIZE]; //for tx
 
@@ -180,10 +161,8 @@ bool lora_connect(lora_module_t* module)
 
     // Retry AT command in case module is still booting
     bool at_success = false;
-    for (int i = 0; i < 3; i++)
-    {
-        if (lora_send_command("AT", buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS))
-        {
+    for (int i = 0; i < 3; i++) {
+        if (lora_send_command("AT", buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS)) {
             at_success = true;
             break;
         }
@@ -191,8 +170,7 @@ bool lora_connect(lora_module_t* module)
         sleep_ms(1000);
     }
 
-    if (!at_success)
-    {
+    if (!at_success) {
         module->state = LORA_ERROR;
         return false;
     }
@@ -201,12 +179,10 @@ bool lora_connect(lora_module_t* module)
     lora_send_command("AT+VER", buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS);
     printf("[LoRa] Version: %s\n", buf);
 
-    if (lora_send_command("AT+ID=DevEui", buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS))
-    {
-        char* comma = strchr(buf, ',');
+    if (lora_send_command("AT+ID=DevEui", buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS)) {
+        char *comma = strchr(buf, ',');
 
-        if (comma != NULL)
-        {
+        if (comma != NULL) {
             comma++; // move past ','
 
             while (*comma == ' ') comma++; // skip spaces
@@ -214,9 +190,7 @@ bool lora_connect(lora_module_t* module)
             lora_process_deveui(comma, module->deveui);
 
             printf("[LoRa] DevEui: %s\n", module->deveui);
-        }
-        else
-        {
+        } else {
             printf("[LoRa] Invalid DevEui format: %s\n", buf);
             return false;
         }
@@ -248,16 +222,14 @@ bool lora_connect(lora_module_t* module)
 
     bool joined = false;
 
-    for (int i = 0; i < LORA_MAX_RETRY_ATTEMPTS; i++)
-    {
+    for (int i = 0; i < LORA_MAX_RETRY_ATTEMPTS; i++) {
         printf("[LoRa] Join attempt %d/%d\n", i + 1, LORA_MAX_RETRY_ATTEMPTS);
 
         uart_flush();
 
-        uart_write_blocking(LORA_UART_ID, (const uint8_t*)"AT+JOIN\r\n", strlen("AT+JOIN\r\n"));
+        uart_write_blocking(LORA_UART_ID, (const uint8_t *) "AT+JOIN\r\n", strlen("AT+JOIN\r\n"));
 
-        if (lora_step_join(buf))
-        {
+        if (lora_step_join(buf)) {
             joined = true;
             break;
         }
@@ -265,8 +237,7 @@ bool lora_connect(lora_module_t* module)
         sleep_ms(LORA_JOIN_TIMEOUT_MS);
     }
 
-    if (!joined)
-    {
+    if (!joined) {
         module->state = LORA_ERROR;
         return false;
     }
@@ -279,8 +250,7 @@ bool lora_connect(lora_module_t* module)
 }
 
 
-bool lora_send_event(lora_module_t* module, lora_event_t event, const char* data)
-{
+bool lora_send_event(lora_module_t *module, lora_event_t event, sys_info_t *systemVariables, const char *data) {
     if (module->state != LORA_READY || !module->joined)
         return false;
 
@@ -288,27 +258,64 @@ bool lora_send_event(lora_module_t* module, lora_event_t event, const char* data
     char cmd[LORA_COMMAND_SIZE];
     char resp[LORA_BUFFER_SIZE];
 
-    if (data)
-        snprintf(msg, sizeof(msg), "%s: %s",
-                 lora_event_to_string(event), data);
-    else
-        snprintf(msg, sizeof(msg), "%s",
-                 lora_event_to_string(event));
+    // Build message
+    switch (event) {
+        case EVENT_PILL_DISPENSED:
+        case EVENT_PILL_NOT_DISPENSED: {
+
+            static int previous_pill_count = 0;
+
+            int current_total = systemVariables->dispensed_pills;
+            int pills_this_dispenser = current_total - previous_pill_count;
+
+            // prevent negative values
+            if (pills_this_dispenser < 0) {
+                pills_this_dispenser = 0;
+            }
+
+            snprintf(msg, sizeof(msg),
+                     "%s | POS:%d | PILLS:%d",
+                     lora_event_to_string(event),
+                     systemVariables->dispenser_position,
+                     pills_this_dispenser);
+
+            previous_pill_count = current_total;
+
+            break;
+        }
+
+        case EVENT_DISPENSER_EMPTY:
+            snprintf(msg, sizeof(msg),
+                     "%s | TOTAL_PILLS:%d",
+                     lora_event_to_string(event),
+                     systemVariables->dispensed_pills);
+            break;
+
+        default:
+            if (data) {
+                snprintf(msg, sizeof(msg),
+                         "%s: %s",
+                         lora_event_to_string(event),
+                         data);
+            } else {
+                snprintf(msg, sizeof(msg),
+                         "%s",
+                         lora_event_to_string(event));
+            }
+            break;
+    }
 
     snprintf(cmd, sizeof(cmd), "AT+MSG=\"%s\"", msg);
 
     printf("[LoRa] Sending: %s\n", msg);
 
-    for (int i = 0; i < LORA_MAX_RETRY_ATTEMPTS; i++)
-    {
-        if (!lora_send_command(cmd, resp,LORA_BUFFER_SIZE,LORA_MSG_SEND_TIMEOUT_MS))
-        {
+    for (int i = 0; i < LORA_MAX_RETRY_ATTEMPTS; i++) {
+        if (!lora_send_command(cmd, resp, LORA_BUFFER_SIZE,LORA_MSG_SEND_TIMEOUT_MS)) {
             return false;
         }
 
-        if (strstr(resp, "busy") == NULL)
-        {
-            printf("[LoRa] Message sent" " \n");
+        if (strstr(resp, "busy") == NULL) {
+            printf("[LoRa] Message sent\n");
             return true;
         }
 
@@ -321,64 +328,55 @@ bool lora_send_event(lora_module_t* module, lora_event_t event, const char* data
     return false;
 }
 
-void lora_power_loss_event(lora_module_t* lora, sys_info_t* systemVariables)
-{
-    // Otherwise → power loss happened
-    switch (systemVariables->program_state)
-    {
-    case PRE_CALIB:
-        lora_send_event(lora, EVENT_POWER_LOSS_PRE_CALIB, NULL);
-        break;
+void lora_power_loss_event(lora_module_t *lora, sys_info_t *systemVariables) {
+    switch (systemVariables->program_state) {
+        case PRE_CALIB:
+            lora_send_event(lora, EVENT_POWER_LOSS_PRE_CALIB, systemVariables, NULL);
+            break;
 
-    case CALIB:
-        lora_send_event(lora, EVENT_POWER_LOSS_CALIB, NULL);
-        break;
+        case CALIB:
+            lora_send_event(lora, EVENT_POWER_LOSS_CALIB, systemVariables, NULL);
+            break;
 
-    case PRE_DISPENSE:
-        lora_send_event(lora, EVENT_POWER_LOSS_PRE_DISPENSE, NULL);
-        break;
+        case PRE_DISPENSE:
+            lora_send_event(lora, EVENT_POWER_LOSS_PRE_DISPENSE, systemVariables, NULL);
+            break;
 
-    case DISPENSE:
-        if (systemVariables->isRunning)
-        {
-            lora_send_event(lora, EVENT_POWER_LOSS_DISPENSE_RUNNING, NULL);
-        }
-        else
-        {
-            lora_send_event(lora, EVENT_POWER_LOSS_DISPENSE_IDLE, NULL);
-        }
-        break;
+        case DISPENSE:
+            if (systemVariables->isRunning) {
+                lora_send_event(lora, EVENT_POWER_LOSS_DISPENSE_RUNNING, systemVariables, NULL);
+            } else {
+                lora_send_event(lora, EVENT_POWER_LOSS_DISPENSE_IDLE, systemVariables, NULL);
+            }
+            break;
 
-    case RESET:
-        lora_send_event(lora, EVENT_RESET, NULL);
-        break;
+        case RESET:
+            lora_send_event(lora, EVENT_RESET, systemVariables, NULL);
+            break;
     }
 }
 
 //state
 
-lora_state_t lora_get_state(lora_module_t* module)
-{
+lora_state_t lora_get_state(lora_module_t *module) {
     return module->state;
 }
 
 
 //events
 
-const char* lora_event_to_string(lora_event_t event)
-{
-    switch (event)
-    {
-    case EVENT_BOOT: return "BOOT";
-    case EVENT_PILL_DISPENSED: return "PILL_DISPENSED";
-    case EVENT_PILL_NOT_DISPENSED: return "PILL_NOT_DISPENSED";
-    case EVENT_DISPENSER_EMPTY: return "DISPENSER_EMPTY";
-    case EVENT_POWER_LOSS_PRE_CALIB: return "PWR_LOSS_PRE_CALIB";
-    case EVENT_POWER_LOSS_CALIB: return "PWR_LOSS_CALIB";
-    case EVENT_POWER_LOSS_PRE_DISPENSE: return "PWR_LOSS_PRE_DISP";
-    case EVENT_POWER_LOSS_DISPENSE_IDLE: return "PWR_LOSS_DISP_IDLE";
-    case EVENT_POWER_LOSS_DISPENSE_RUNNING: return "PWR_LOSS_DISP_RUN";
-    case EVENT_RESET: return "RESET";
-    default: return "UNKNOWN";
+const char *lora_event_to_string(lora_event_t event) {
+    switch (event) {
+        case EVENT_BOOT: return "BOOT";
+        case EVENT_PILL_DISPENSED: return "PILL_DISPENSED";
+        case EVENT_PILL_NOT_DISPENSED: return "PILL_NOT_DISPENSED";
+        case EVENT_DISPENSER_EMPTY: return "DISPENSER_EMPTY";
+        case EVENT_POWER_LOSS_PRE_CALIB: return "PWR_LOSS_PRE_CALIB";
+        case EVENT_POWER_LOSS_CALIB: return "PWR_LOSS_CALIB";
+        case EVENT_POWER_LOSS_PRE_DISPENSE: return "PWR_LOSS_PRE_DISP";
+        case EVENT_POWER_LOSS_DISPENSE_IDLE: return "PWR_LOSS_DISP_IDLE";
+        case EVENT_POWER_LOSS_DISPENSE_RUNNING: return "PWR_LOSS_DISP_RUN";
+        case EVENT_RESET: return "RESET";
+        default: return "UNKNOWN";
     }
 }

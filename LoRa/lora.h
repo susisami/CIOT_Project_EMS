@@ -56,8 +56,7 @@ void lora_init(lora_module_t* module);
 bool lora_connect(lora_module_t* module);
 
 // Send an event message to LoRaWAN network
-bool lora_send_event(lora_module_t* module, lora_event_t event, const char* data);
-
+bool lora_send_event(lora_module_t* module, lora_event_t event, sys_info_t* systemVariables, const char* data);
 // Get current state of LoRa module
 lora_state_t lora_get_state(lora_module_t* module);
 

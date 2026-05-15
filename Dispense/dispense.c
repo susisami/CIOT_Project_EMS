@@ -42,7 +42,7 @@ void dispense(sys_info_t* systemVariables, lora_module_t* lora_module)
 
             if (!dispensed)
             {
-                lora_send_event(lora_module, EVENT_PILL_NOT_DISPENSED, NULL);
+                lora_send_event(lora_module, EVENT_PILL_NOT_DISPENSED,systemVariables, NULL);
                 for (int i = 0; i < NO_PILL_BLINK_TIMES * 2; i++)
                 {
                     gpio_put(LED_2, !gpio_get(LED_2));
@@ -52,7 +52,7 @@ void dispense(sys_info_t* systemVariables, lora_module_t* lora_module)
 
             else
             {
-                lora_send_event(lora_module, EVENT_PILL_DISPENSED, NULL);
+                lora_send_event(lora_module, EVENT_PILL_DISPENSED,systemVariables, NULL);
             }
 
             dispensed = false;

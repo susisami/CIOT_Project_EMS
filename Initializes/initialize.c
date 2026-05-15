@@ -38,12 +38,12 @@ void init_sys_variables(sys_info_t* systemVariables)
 }
 
 // Init LoRa module
-void init_lora(lora_module_t* lora_module)
+void init_lora(lora_module_t* lora_module, sys_info_t* systemVariables)
 {
     lora_init(lora_module);
     if (lora_connect(lora_module))
     {
-        lora_send_event(lora_module, EVENT_BOOT, NULL);
+        lora_send_event(lora_module, EVENT_BOOT, systemVariables, NULL);
     }
     printf("Starting main loop\n");
 }

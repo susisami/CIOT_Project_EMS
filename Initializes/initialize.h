@@ -64,7 +64,7 @@ void init_gpio_all(void);
 void init_sys_variables(sys_info_t* systemVariables);
 
 // init LoRa module
-void init_lora(lora_module_t* lora_module);
+void init_lora(lora_module_t* lora_module, sys_info_t* systemVariables);
 
 // init i2c
 int init_i2c_instance(void);
