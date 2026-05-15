@@ -3,8 +3,8 @@
 
 /* CONSTANTS */
 
-/* GPIO OUTPUTS */
-// COILS
+/* GPIO PINS */
+// MOTOR COILS
 #define MTR_IN1 2
 #define MTR_IN2 3
 #define MTR_IN3 6
@@ -15,8 +15,11 @@
 #define LED_2 21
 #define LED_3 22
 
+// I2C
+#define SDA_PIN 16
+#define SCL_PIN 17
 
-/* GPIO INPUTS */
+// INPUTS 
 #define OPTO_FORK 28
 #define ROT_SW 12
 #define PIEZO_SR 27
@@ -29,11 +32,9 @@
 #define LED_BLINK_SLOW_MS 1000
 #define LED_BLINK_FAST_MS 100
 #define MTR_SLEEP_US 1100               // sleep between each motor step
-#define DISPENSE_TIMEOUT_MS 5000        // 30 000 ms
+#define DISPENSE_TIMEOUT_MS 30000       // 30 000 ms
 #define PIEZO_TIMEOUT_MS 90             // t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
 #define PIEZO_DROP_TIMEOUT_MS 80        // after a pill has hit the sensor, timeout for next touch to be registered
-#define LORA_JOIN_TIMEOUT_MS 1000       // 20 000??
-#define LORA_MSG_SEND_TIMEOUT_MS 5000
 
 
 /* ISR RELATED */
@@ -47,11 +48,11 @@
 #define MTR_PHASE_AMOUNT 8
 #define DISPENSE_ROUNDS 7
 #define STEPS_IN_ROW 1
-#define CAROUSEL_DEF_SPEED 8
+#define CAROUSEL_DEF_SPEED 4
 #define CAROUSEL_MAX_SPEED 1
 #define STEP_COUNT_SECTIONS 2       // the whole rotation divided by the two opto edges into two sections
 #define DISPENSER_WHEEL_DIVISOR 8   // dispenser wheel slots
-#define CALIBRATION_ROTATIONS 2     // how many rotations to count the average steps from
+#define CALIBRATION_ROTATIONS 3     // 3 rotations to count the average steps
 #define NO_PILL_BLINK_TIMES 5
 
 
@@ -71,6 +72,10 @@
 #define LORA_BUFFER_SIZE 128
 #define LORA_MESSAGE_SIZE 128
 #define LORA_COMMAND_SIZE 192
+
+// TIMEOUTS
+#define LORA_JOIN_TIMEOUT_MS 20000      // 20 000 ms
+#define LORA_MSG_SEND_TIMEOUT_MS 5000
 
 
 /*I2C & EEPROM */
@@ -93,8 +98,6 @@
 // I2C INITS
 #define I2C_PORT i2c0
 #define I2C_FREQ 100000 // 100 kHz
-#define SDA_PIN 16
-#define SCL_PIN 17
 
 // TIMEOUTS
 #define I2C_POLLING_TIMEOUT_US 100

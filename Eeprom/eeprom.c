@@ -82,7 +82,7 @@ int print_system_status(const struct SystemInformation* systemVariables)
 }
 
 // Reset eeprom system variables
-int eeprom_write_all()
+int eeprom_erase(void)
 {
     uint8_t termination_bf[3];
     termination_bf[2] = 0;

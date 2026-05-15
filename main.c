@@ -28,12 +28,13 @@ int main()
     init_gpio_all();
     init_i2c_instance();
     init_sys_variables(&systemVariables);
-    init_lora(&lora_module, &systemVariables);
+    init_lora(&lora_module);
 
     // you can test lora messages even not connected to server
-    //uncomment
+    // UNCOMMENT FOR TESTING
     //lora_module.state = LORA_READY;
     //lora_module.joined = true;
+
 
     /* QUEUE INITIALIZES */
     //ROTARY ENCODER SW QUEUE (GP12)
@@ -127,7 +128,7 @@ int main()
 
             dispense(&systemVariables, &lora_module);
 
-            lora_send_event(&lora_module, EVENT_DISPENSER_EMPTY,&systemVariables, NULL);
+            lora_send_event(&lora_module, EVENT_DISPENSER_EMPTY, NULL);
 
             systemVariables.program_state = RESET;
             write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
@@ -140,9 +141,9 @@ int main()
             // Reset the systemVariables and write reset values to EEPROM
             init_sys_variables(&systemVariables);
 
-            eeprom_write_all();
+            eeprom_erase();
 
-            lora_send_event(&lora_module, EVENT_RESET,&systemVariables, NULL);
+            lora_send_event(&lora_module, EVENT_RESET, NULL);
 
             gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
 
