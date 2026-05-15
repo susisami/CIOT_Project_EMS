@@ -31,9 +31,9 @@ int main()
     init_lora(&lora_module);
 
     // you can test lora messages even not connected to server
-    //uncomment
-    lora_module.state = LORA_READY;
-    lora_module.joined = true;
+    // UNCOMMENT FOR TESTING
+    //lora_module.state = LORA_READY;
+    //lora_module.joined = true;
 
 
     /* QUEUE INITIALIZES */
@@ -141,7 +141,7 @@ int main()
             // Reset the systemVariables and write reset values to EEPROM
             init_sys_variables(&systemVariables);
 
-            eeprom_write_all();
+            eeprom_erase();
 
             lora_send_event(&lora_module, EVENT_RESET, NULL);
 

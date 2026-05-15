@@ -29,10 +29,10 @@
 #define LED_BLINK_SLOW_MS 1000
 #define LED_BLINK_FAST_MS 100
 #define MTR_SLEEP_US 1100               // sleep between each motor step
-#define DISPENSE_TIMEOUT_MS 5000        // 30 000 ms
+#define DISPENSE_TIMEOUT_MS 30000        // 30 000 ms
 #define PIEZO_TIMEOUT_MS 90             // t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
 #define PIEZO_DROP_TIMEOUT_MS 80        // after a pill has hit the sensor, timeout for next touch to be registered
-#define LORA_JOIN_TIMEOUT_MS 1000       // 20 000??
+#define LORA_JOIN_TIMEOUT_MS 20000       // 20 000??
 #define LORA_MSG_SEND_TIMEOUT_MS 5000
 
 

@@ -20,7 +20,7 @@ int recover_prev_position(const struct SystemInformation* systemVariables);
 int print_system_status(const struct SystemInformation* systemVariables);
 
 // RESETS SYSTEM VARIABLES' ADDRESSES INSIDE EEPROM
-int eeprom_write_all();
+int eeprom_erase(void);
 
 
 /* READING OPERATIONS */
