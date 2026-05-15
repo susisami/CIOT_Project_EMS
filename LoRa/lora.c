@@ -136,10 +136,10 @@ static bool lora_step_join(char *buf) {
         if (lora_uart_read_line(buf, LORA_BUFFER_SIZE, LORA_JOIN_TIMEOUT_MS)) {
             printf("[LoRa RX] %s\n", buf);
 
-            if (strstr(buf, "+JOIN: Done"))
-                return true;
-
-            if (strstr(buf, "+JOIN: Joined already"))
+            if (strstr(buf, "+JOIN: Done") ||
+                strstr(buf, "+JOIN: Joined already") ||
+                strstr(buf, "+EVT:JOINED") ||
+                strstr(buf, "+JOIN:SUCCESS"))
                 return true;
 
             if (strstr(buf, "Join failed"))
@@ -262,7 +262,6 @@ bool lora_send_event(lora_module_t *module, lora_event_t event, sys_info_t *syst
     switch (event) {
         case EVENT_PILL_DISPENSED:
         case EVENT_PILL_NOT_DISPENSED: {
-
             snprintf(msg, sizeof(msg),
                      "%s | POS:%d |",
                      lora_event_to_string(event),
@@ -305,7 +304,7 @@ bool lora_send_event(lora_module_t *module, lora_event_t event, sys_info_t *syst
             return true;
         }
 
-        printf("[LoRa] Modem busy, retry %d/3\n", i + 1);
+        printf("[LoRa] Modem busy, retry %d/%d\n", i + 1, LORA_MAX_RETRY_ATTEMPTS);
 
         sleep_ms(LORA_MSG_SEND_TIMEOUT_MS);
     }
