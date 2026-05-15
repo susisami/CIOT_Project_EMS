@@ -35,8 +35,6 @@
 #define DISPENSE_TIMEOUT_MS 30000       // 30 000 ms
 #define PIEZO_TIMEOUT_MS 90             // t = sqrt(2h / g) Physics formula for free fall [WORST SCENARIO] + 5ms
 #define PIEZO_DROP_TIMEOUT_MS 80        // after a pill has hit the sensor, timeout for next touch to be registered
-#define LORA_JOIN_TIMEOUT_MS 20000      // 20 000 ms
-#define LORA_MSG_SEND_TIMEOUT_MS 5000
 
 
 /* ISR RELATED */
@@ -50,7 +48,7 @@
 #define MTR_PHASE_AMOUNT 8
 #define DISPENSE_ROUNDS 7
 #define STEPS_IN_ROW 1
-#define CAROUSEL_DEF_SPEED 8
+#define CAROUSEL_DEF_SPEED 4
 #define CAROUSEL_MAX_SPEED 1
 #define STEP_COUNT_SECTIONS 2       // the whole rotation divided by the two opto edges into two sections
 #define DISPENSER_WHEEL_DIVISOR 8   // dispenser wheel slots
@@ -74,6 +72,10 @@
 #define LORA_BUFFER_SIZE 128
 #define LORA_MESSAGE_SIZE 128
 #define LORA_COMMAND_SIZE 192
+
+// TIMEOUTS
+#define LORA_JOIN_TIMEOUT_MS 20000      // 20 000 ms
+#define LORA_MSG_SEND_TIMEOUT_MS 5000
 
 
 /*I2C & EEPROM */
