@@ -14,8 +14,7 @@ typedef enum { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE, RESET } program_state_t
 
 /* STRUCTURES */
 // SYSTEM STRUCTURE
-typedef struct SystemInformation
-{
+typedef struct SystemInformation {
     /* EEPROM VARIABLES */
     // Current program state { PRE_CALIB, CALIB, PRE_DISPENSE, DISPENSE }
     program_state_t program_state;
@@ -44,8 +43,7 @@ typedef struct SystemInformation
 } sys_info_t;
 
 // EEPROM PAYLOAD STRUCTURE ( MADE FOR PROGRAM SCALABILITY )
-typedef struct Eeprom_Payload
-{
+typedef struct Eeprom_Payload {
     uint8_t payload_array[MAX_PAYLOAD_SIZE];
     uint payload_length;
 
@@ -61,10 +59,10 @@ typedef struct Eeprom_Payload
 void init_gpio_all(void);
 
 // init systemVariables
-void init_sys_variables(sys_info_t* systemVariables);
+void init_sys_variables(sys_info_t *systemVariables);
 
 // init LoRa module
-void init_lora(lora_module_t* lora_module, sys_info_t* systemVariables);
+void init_lora(lora_module_t *lora_module, sys_info_t *systemVariables);
 
 // init i2c
 int init_i2c_instance(void);

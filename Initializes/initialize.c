@@ -9,8 +9,7 @@
 
 /* INITIALIZATION FUNCTIONS */
 // EEPROM INIT
-int init_i2c_instance(void)
-{
+int init_i2c_instance(void) {
     i2c_init(i2c0, I2C_FREQ);
 
     gpio_set_function(SDA_PIN, GPIO_FUNC_I2C);
@@ -24,8 +23,7 @@ int init_i2c_instance(void)
 }
 
 // SYSTEM STRUCT
-void init_sys_variables(sys_info_t* systemVariables)
-{
+void init_sys_variables(sys_info_t *systemVariables) {
     systemVariables->program_state = PRE_CALIB;
     systemVariables->avg_steps = 0;
     systemVariables->opto_gap_steps = 0;
@@ -38,19 +36,16 @@ void init_sys_variables(sys_info_t* systemVariables)
 }
 
 // Init LoRa module
-void init_lora(lora_module_t* lora_module, sys_info_t* systemVariables)
-{
+void init_lora(lora_module_t *lora_module, sys_info_t *systemVariables) {
     lora_init(lora_module);
-    if (lora_connect(lora_module))
-    {
+    if (lora_connect(lora_module)) {
         lora_send_event(lora_module, EVENT_BOOT, systemVariables, NULL);
     }
     printf("Starting main loop\n");
 }
 
 // Init GPIOs
-void init_gpio_all(void)
-{
+void init_gpio_all(void) {
     // LEDS
     gpio_init(LED_1);
     gpio_init(LED_2);

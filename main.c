@@ -13,8 +13,7 @@
 
 
 /* MAIN */
-int main()
-{
+int main() {
     /* SYSTEM STRUCTURES */
     // System Information:
     sys_info_t systemVariables;
@@ -28,7 +27,7 @@ int main()
     init_gpio_all();
     init_i2c_instance();
     init_sys_variables(&systemVariables);
-    init_lora(&lora_module);
+    init_lora(&lora_module, &systemVariables);
 
     // you can test lora messages even not connected to server
     // UNCOMMENT FOR TESTING
@@ -58,100 +57,92 @@ int main()
     print_system_status(&systemVariables);
 
 
-    while (true)
-    {
-        switch (systemVariables.program_state)
-        {
-        case PRE_CALIB: // BLINK LED UNTIL BUTTON IS PRESSED //
+    while (true) {
+        switch (systemVariables.program_state) {
+            case PRE_CALIB: // BLINK LED UNTIL BUTTON IS PRESSED //
 
-            if (systemVariables.button_pressed) // ROT_SW button pressed
-            {
-                gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, false);
-                systemVariables.button_pressed = false;
-                gpio_put(LED_2, false);
-
-                systemVariables.program_state = CALIB;
-                write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
-            }
-            else // BLINK LED
-            {
-                gpio_put(LED_2, !gpio_get(LED_2));
-
-                // sleep LED_BLINK_MS, stop sleeping if queue is not empty (== button has been pressed)
-                for (int i = 0; i < LED_BLINK_SLOW_MS && !queue_try_peek(&button_queue, NULL); i++)
+                if (systemVariables.button_pressed) // ROT_SW button pressed
                 {
-                    sleep_ms(1);
+                    gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, false);
+                    systemVariables.button_pressed = false;
+                    gpio_put(LED_2, false);
+
+                    systemVariables.program_state = CALIB;
+                    write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
+                } else // BLINK LED
+                {
+                    gpio_put(LED_2, !gpio_get(LED_2));
+
+                    // sleep LED_BLINK_MS, stop sleeping if queue is not empty (== button has been pressed)
+                    for (int i = 0; i < LED_BLINK_SLOW_MS && !queue_try_peek(&button_queue, NULL); i++) {
+                        sleep_ms(1);
+                    }
+
+                    systemVariables.program_state = PRE_CALIB;
                 }
+                break;
+
+
+            case CALIB: // CALIBRATE MOTOR //
+
+                // CALIBRATION RUN
+                motor_calibration(&systemVariables.avg_steps, &systemVariables.opto_gap_steps);
+
+                // AFTER CALIBRATION RUN
+                systemVariables.program_state = PRE_DISPENSE;
+                write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
+
+                print_system_status(&systemVariables);
+
+                gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
+                gpio_put(LED_2, true);
+
+                break;
+
+
+            case PRE_DISPENSE: // WAIT FOR A BUTTON PRESS //
+
+                if (systemVariables.button_pressed) {
+                    gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, false);
+                    systemVariables.button_pressed = false;
+                    gpio_put(LED_2, false);
+
+                    systemVariables.program_state = DISPENSE;
+                    write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
+                } else {
+                    systemVariables.program_state = PRE_DISPENSE;
+                }
+                break;
+
+
+            case DISPENSE: // DISPENSE PILLS //
+
+                dispense(&systemVariables, &lora_module);
+
+                lora_send_event(&lora_module, EVENT_DISPENSER_EMPTY, &systemVariables, NULL);
+
+                systemVariables.program_state = RESET;
+                write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
+
+                break;
+
+
+            case RESET: // RESET //
+
+                // Reset the systemVariables and write reset values to EEPROM
+                init_sys_variables(&systemVariables);
+
+                eeprom_erase();
+
+                lora_send_event(&lora_module, EVENT_RESET, &systemVariables, NULL);
+
+                gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
 
                 systemVariables.program_state = PRE_CALIB;
-            }
-            break;
 
+                print_system_status(&systemVariables);
 
-        case CALIB: // CALIBRATE MOTOR //
-
-            // CALIBRATION RUN
-            motor_calibration(&systemVariables.avg_steps, &systemVariables.opto_gap_steps);
-
-            // AFTER CALIBRATION RUN
-            systemVariables.program_state = PRE_DISPENSE;
-            write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
-
-            print_system_status(&systemVariables);
-
-            gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
-            gpio_put(LED_2, true);
-
-            break;
-
-
-        case PRE_DISPENSE: // WAIT FOR A BUTTON PRESS //
-
-            if (systemVariables.button_pressed)
-            {
-                gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, false);
-                systemVariables.button_pressed = false;
-                gpio_put(LED_2, false);
-
-                systemVariables.program_state = DISPENSE;
-                write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
-            }
-
-            else
-            {
-                systemVariables.program_state = PRE_DISPENSE;
-            }
-            break;
-
-
-        case DISPENSE: // DISPENSE PILLS //
-
-            dispense(&systemVariables, &lora_module);
-
-            lora_send_event(&lora_module, EVENT_DISPENSER_EMPTY, NULL);
-
-            systemVariables.program_state = RESET;
-            write_eeprom(EEPROM_ADDR_PROGRAM_STATE, systemVariables.program_state);
-
-            break;
-
-
-        case RESET: // RESET //
-
-            // Reset the systemVariables and write reset values to EEPROM
-            init_sys_variables(&systemVariables);
-
-            eeprom_erase();
-
-            lora_send_event(&lora_module, EVENT_RESET, NULL);
-
-            gpio_set_irq_enabled(ROT_SW, GPIO_IRQ_EDGE_FALL, true);
-
-            systemVariables.program_state = PRE_CALIB;
-
-            print_system_status(&systemVariables);
-
-            break;
+                break;
         }
 
         queue_try_remove(&button_queue, &systemVariables.button_pressed);

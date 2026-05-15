@@ -262,7 +262,6 @@ bool lora_send_event(lora_module_t *module, lora_event_t event, sys_info_t *syst
     switch (event) {
         case EVENT_PILL_DISPENSED:
         case EVENT_PILL_NOT_DISPENSED: {
-
             static int previous_pill_count = 0;
 
             int current_total = systemVariables->dispensed_pills;
