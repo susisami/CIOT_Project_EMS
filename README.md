@@ -1,4 +1,6 @@
-<img src="pictures/Pill_Dispenser_Super.PNG" alt="Pill Dispenser" width="300">
+<p align="center">
+  <img src="pictures/Pill_Dispenser_Super.PNG" alt="Pill Dispenser" width="400">
+</p>
 
 # Pill Dispenser Super
 
