@@ -40,10 +40,10 @@ By ensuring the device position and operation parameters are monitored at all ti
         <li>External EEPROM memory chip</li>
       </ul>
     </td>
-    <td align="center" valign="top" width="300px">
-      <img src="pictures/LoraWAN_Logic.PNG" width="300px" alt="LoRaWAN Logic" />
+    <td align="center" valign="top" width="280px">
+      <img src="pictures/LoraWAN_Logic.PNG" width="280px" alt="LoRaWAN Logic" />
       <br><br>
-      <img src="pictures/EEPROM_LOGIC.PNG" width="300px" alt="EEPROM Logic" />
+      <img src="pictures/EEPROM_LOGIC.PNG" width="280px" alt="EEPROM Logic" />
     </td>
   </tr>
 </table>
