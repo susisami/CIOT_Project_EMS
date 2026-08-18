@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="pictures/Pill_Dispenser_Super.PNG" alt="Pill Dispenser" width="400">
+  <img src="pictures/Pill_Dispenser_Super.PNG" alt="Pill Dispenser" width="300">
 </p>
 
 # Pill Dispenser Super
