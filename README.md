@@ -1,4 +1,5 @@
-![Pill Dispenser Super Main Image] <img src="pictures/Pill_Dispenser_Super.PNG" alt="Pill Dispenser" width="300">
+<img src="pictures/Pill_Dispenser_Super.PNG" alt="Pill Dispenser" width="500">
+
 # Pill Dispenser Super
 
 Pill Dispenser Super is a smart healthcare IoT device designed primarily for elderly care homes, where medication usage is high and human error poses a significant risk. The device automates medication dispensing, tracks system states, and transmits status messages and alerts wirelessly over a LoRaWAN network to an administrative server.
