@@ -20,25 +20,31 @@ By ensuring the device position and operation parameters are monitored at all ti
 
 ---
 
-## Technical Stack
-
-### Software and Protocols
-* **Programming Language:** Embedded C
-* **Connectivity Protocol:** LoRaWAN
-* **Hardware Interfaces:** I2C, GPIO, Hardware Interrupts, Task Queues
-* **Data Storage:** EEPROM read/write routines
-
-### Hardware Components
-* Embedded microcontroller unit (MCU)
-* Motor assembly and calibration logic
-* LoRaWAN communication module
-* External EEPROM memory chip
-
-<p align="center">
-  <img src="pictures/LoraWAN_Logic.PNG" width="40%" />
-  &nbsp; &nbsp;
-  <img src="pictures/EEPROM_LOGIC.PNG" width="40%" />
-</p>
+<table>
+  <tr>
+    <td valign="top">
+      <h3>Software and Protocols</h3>
+      <ul>
+        <li><b>Programming Language:</b> Embedded C</li>
+        <li><b>Connectivity Protocol:</b> LoRaWAN</li>
+        <li><b>Hardware Interfaces:</b> I2C, GPIO, Hardware Interrupts, Task Queues</li>
+        <li><b>Data Storage:</b> EEPROM read/write routines</li>
+      </ul>
+      <h3>Hardware Components</h3>
+      <ul>
+        <li>Embedded microcontroller unit (MCU)</li>
+        <li>Motor assembly and calibration logic</li>
+        <li>LoRaWAN communication module</li>
+        <li>External EEPROM memory chip</li>
+      </ul>
+    </td>
+    <td align="center" valign="middle" width="45%">
+      <img src="pictures/LoraWAN_Logic.PNG" width="100%" alt="LoRaWAN Logic" />
+      <br><br>
+      <img src="pictures/EEPROM_LOGIC.PNG" width="100%" alt="EEPROM Logic" />
+    </td>
+  </tr>
+</table>
 
 ---
 
