@@ -34,8 +34,6 @@ By ensuring the device position and operation parameters are monitored at all ti
 * LoRaWAN communication module
 * External EEPROM memory chip
 
-<br>
-
 <p align="center">
   <img src="pictures/LoraWAN_Logic.PNG" width="48%" />
   &nbsp;
