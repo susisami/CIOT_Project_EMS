@@ -58,6 +58,8 @@ The firmware is structured modularly across dedicated source files to ensure rea
 2. **State Restoration:** Reads saved operational parameters from EEPROM. If the EEPROM data is empty or unitialized, default parameters are loaded.
 3. **Execution Loop:** Runs the main state machine. Critical state changes trigger an immediate update to EEPROM and dispatch corresponding LoRaWAN messages.
 
+<br><img src="pictures/PDS_Main_Logic.PNG" width="300px" alt="System Flowchart" /><br>
+
 ---
 
 By: Sami, Max, Eeli - Metropolia UAS
