@@ -41,9 +41,9 @@ By ensuring the device position and operation parameters are monitored at all ti
       </ul>
     </td>
     <td align="center" valign="top" width="260px">
-      <img src="pictures/LoraWAN_Logic.PNG" width="240px" alt="LoRaWAN Logic" />
+      <img src="pictures/LoraWAN_Logic.PNG" width="300px" alt="LoRaWAN Logic" />
       <br><br>
-      <img src="pictures/EEPROM_LOGIC.PNG" width="240px" alt="EEPROM Logic" />
+      <img src="pictures/EEPROM_LOGIC.PNG" width="300px" alt="EEPROM Logic" />
     </td>
   </tr>
 </table>
